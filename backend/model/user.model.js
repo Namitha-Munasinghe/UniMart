@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     },
     studentId: {
       type: String,
-      required: true,
+      required: [true, "Student ID is required"],
       unique: true,
     },
     email: {
@@ -28,13 +28,16 @@ const userSchema = new mongoose.Schema(
     //useful for meeting scheduling
     phone: {
       type: String,
+      required: [true, "Phone number is required"],
     },
     faculty: {
       type: String,
+      required: [true, "Faculty is required"],
     },
-    profileImage: {
-      type: String,
-    },
+    // profileImage: {
+    //   type: String,
+    // },
+
     //for admin
     role: {
       type: String,
@@ -65,24 +68,20 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const User = mongoose.model("User", userSchema);
+//hash password before saving to database
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
 
-//pre saving hook to hash password before saving to database
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  try{
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  }catch(err){
-    next(err);
-  }
-})
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
 //method to compare password during login
 userSchema.methods.comparePassword = async function (password) {
     return bcrypt.compare(password, this.password);
 }
+
+
+const User = mongoose.model("User", userSchema);
 
 export default User;
