@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
 
 const Navbar = () => {
   // 🔐 Simulated auth state
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(true); // change to false to test normal user
+  const [isAdmin, setIsAdmin] = useState(false); // change to false to test normal user
 
   const linkClass = "hover:text-indigo-600 transition";
 
@@ -46,8 +46,9 @@ const Navbar = () => {
         {/* Right Section */}
         {/* Right Section */}
         <div className="flex items-center space-x-5 items-center">
-          <NavLink to="/cart">
-            <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" />
+          <NavLink to="/favourites">
+            {/* <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" /> */}
+            <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition" />
           </NavLink>
 
           {!isLoggedIn ? (

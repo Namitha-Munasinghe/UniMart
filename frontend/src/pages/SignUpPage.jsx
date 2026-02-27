@@ -12,6 +12,7 @@ import {
   IdCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useUserStore } from "../stores/useUserStore";
 
 const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
@@ -19,12 +20,14 @@ const SignUpPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    studentID: "",
+    studentId: "",
     faculty: "",
     phone: "",
     password: "",
     confirmPassword: "",
   });
+
+  const {signup} = useUserStore();
 
   const faculties = [
     "Faculty of Computing",
@@ -42,7 +45,7 @@ const SignUpPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
+    signup(formData.username, formData.email, formData.studentId, formData.faculty, formData.phone, formData.password, formData.confirmPassword);
 
     setTimeout(() => {
       console.log(formData);
@@ -106,9 +109,9 @@ const SignUpPage = () => {
             <IdCard className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              name="studentID"
+              name="studentId"
               placeholder="Student ID"
-              value={formData.studentID}
+              value={formData.studentId}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
               required
@@ -197,7 +200,7 @@ const SignUpPage = () => {
         <p className="text-sm text-gray-600 mt-6 text-center">
           Already have an account?{" "}
           <Link
-            to="/signin"
+            to="/login"
             className="text-indigo-600 font-medium hover:underline"
           >
             Sign In
