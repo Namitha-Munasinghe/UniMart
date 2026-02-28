@@ -23,7 +23,7 @@ const Navbar = () => {
         </NavLink>
 
         {/* Center Links */}
-        <div className="hidden md:flex space-x-8 text-gray-700 font-medium">
+        {/* <div className="hidden md:flex space-x-8 text-gray-700 font-medium">
           <NavLink
             to="/"
             className={({ isActive }) =>
@@ -41,7 +41,7 @@ const Navbar = () => {
           >
             Browse
           </NavLink>
-        </div>
+        </div> */}
 
         {/* Right Section */}
         {/* Right Section */}

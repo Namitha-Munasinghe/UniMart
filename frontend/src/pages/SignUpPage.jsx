@@ -14,6 +14,7 @@ import {
 import { motion } from "framer-motion";
 import { useUserStore } from "../stores/useUserStore";
 
+
 const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
 
