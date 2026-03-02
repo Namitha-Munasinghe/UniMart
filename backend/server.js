@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.route.js";
 import { connectDB } from "./lib/db.js";
+import dns from 'dns';
 
+dns.setServers(["1.1.1.1", "8.8.8.8"])
 dotenv.config();
 
 const app = express();
