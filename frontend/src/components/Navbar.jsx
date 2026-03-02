@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import {
+  ShoppingCart,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Heart,
+} from "lucide-react";
+import unimart from "../assets/unimart.png";
 
 const Navbar = () => {
   // 🔐 Simulated auth state

@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Lock, LogIn, ArrowRight, Loader } from "lucide-react";
 import { motion } from "framer-motion";
+import { useUserStore } from "../stores/useUserStore.js"; 
 
 const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const {login} = useUserStore();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,6 +25,7 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
+    login(formData.email, formData.password);
 
     // Simulate API call
     setTimeout(() => {

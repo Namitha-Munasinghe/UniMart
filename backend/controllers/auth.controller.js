@@ -3,6 +3,7 @@ import User from "../model/user.model.js";
 import jwt from "jsonwebtoken";
 
 
+
 //generate access and refresh tokens
 const generateToken = (userId) => {
   const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
