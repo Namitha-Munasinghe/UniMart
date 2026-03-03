@@ -1,64 +1,37 @@
-import React, { useState } from "react";
+// Navbar.jsx
+import React from "react";
 import { NavLink } from "react-router-dom";
-import {
-  ShoppingCart,
-  User,
-  LogOut,
-  LayoutDashboard,
-  Heart,
-} from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import { useUserStore } from "../stores/useUserStore";
 import unimart from "../assets/unimart.png";
 
 const Navbar = () => {
-  // 🔐 Simulated auth state
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false); // change to false to test normal user
+  const { user, logout } = useUserStore(); // make sure your store has a logout function
 
+  const isAdmin = user?.role === "admin";
   const linkClass = "hover:text-indigo-600 transition";
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setIsAdmin(false);
+    logout(); // call store logout
   };
 
   return (
     <nav className="bg-white shadow-md px-6 py-4">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <NavLink to="/" className="text-2xl font-bold text-indigo-600">
+        <NavLink to="/" className="flex items-center text-2xl font-bold text-indigo-600">
+          <img src={unimart} alt="UniMart" className="w-8 h-8 mr-2" />
           UniMart
         </NavLink>
 
-        {/* Center Links */}
-        {/* <div className="hidden md:flex space-x-8 text-gray-700 font-medium">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `${linkClass} ${isActive ? "text-indigo-600 font-semibold" : ""}`
-            }
-          >
-            Home
-          </NavLink>
-
-          <NavLink
-            to="/browse"
-            className={({ isActive }) =>
-              `${linkClass} ${isActive ? "text-indigo-600 font-semibold" : ""}`
-            }
-          >
-            Browse
-          </NavLink>
-        </div> */}
-
-        {/* Right Section */}
-        {/* Right Section */}
-        <div className="flex items-center space-x-5 items-center">
+        <div className="flex items-center space-x-5">
+          {/* Favorites / Heart */}
           <NavLink to="/favourites">
-            {/* <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" /> */}
             <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition" />
           </NavLink>
 
-          {!isLoggedIn ? (
+          {/* Auth Links */}
+          {!user ? (
             <>
               <NavLink
                 to="/login"
@@ -76,12 +49,12 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* 👤 Profile FIRST */}
+              {/* Profile */}
               <NavLink to="/profile">
                 <User className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" />
               </NavLink>
 
-              {/* 👑 Admin AFTER Profile */}
+              {/* Admin Link */}
               {isAdmin && (
                 <NavLink
                   to="/admin"

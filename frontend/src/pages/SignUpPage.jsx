@@ -16,10 +16,10 @@ import { useUserStore } from "../stores/useUserStore";
 
 
 const SignUpPage = () => {
-  const [loading, setLoading] = useState(false);
+  
 
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
     studentId: "",
     faculty: "",
@@ -28,7 +28,7 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
-  const {signup} = useUserStore();
+  const {signup, loading} = useUserStore();
 
   const faculties = [
     "Faculty of Computing",
@@ -46,12 +46,11 @@ const SignUpPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    signup(formData.username, formData.email, formData.studentId, formData.faculty, formData.phone, formData.password, formData.confirmPassword);
+    signup(formData);
 
-    setTimeout(() => {
-      console.log(formData);
-      setLoading(false);
-    }, 2000);
+    // setTimeout(() => {
+    //   console.log(formData);
+    // }, 2000);
   };
 
   return (
@@ -77,14 +76,14 @@ const SignUpPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Username */}
+          {/* Name */}
           <div className="relative">
             <User className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
+              name="name"
+              placeholder="Name"
+              value={formData.name}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
               required
