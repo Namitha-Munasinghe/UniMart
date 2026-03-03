@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import Review from "../models/review.model.js"; // Ensure you have created this model
+import Review from "../models/review.model.js"; // Ensure this model exists
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, 
@@ -10,6 +10,7 @@ export const submitReview = async (req, res) => {
     const { comment, rating, sellerId, buyerId } = req.body;
 
     // STEP 1: AI CONTENT MODERATION
+    // Checks for hate speech, harassment, or profanity
     const moderation = await openai.moderations.create({ input: comment });
     const isFlagged = moderation.results[0].flagged;
 
@@ -21,7 +22,7 @@ export const submitReview = async (req, res) => {
     }
 
     // STEP 2: AI SENTIMENT ANALYSIS
-    // We ask AI to categorize the review mood to help calculate the Trust Score
+    // Identifies if the review is Positive, Neutral, or Negative
     const sentimentResponse = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
@@ -38,7 +39,7 @@ export const submitReview = async (req, res) => {
       sellerId,
       rating,
       comment,
-      sentiment, // Saved for Trust Score calculation
+      sentiment, // Used for Trust Score calculation later
       isFlagged: false
     });
 
