@@ -47,7 +47,7 @@ const ProfilePage = () => {
 
             <div>
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                Welcome back, {user.name} 👋
+                Welcome back, {user.name} 
                 {user.role === "admin" && (
                   <span className="flex items-center gap-1 text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full">
                     <ShieldCheck size={16} />
@@ -111,7 +111,7 @@ const ProfilePage = () => {
               Account Status
             </h3>
             <p className="text-xl font-bold text-gray-800">
-              {user.isBlocked ? "Blocked ❌" : "Active ✅"}
+              {user.isBlocked ? "Blocked 🔴" : "Active 🟢"}
             </p>
           </div>
         </div>
