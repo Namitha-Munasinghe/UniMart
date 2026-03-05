@@ -18,6 +18,7 @@ function App() {
   }, [checkAuth]);
 
   if (checkingAuth) return <LoadingSpinner />;
+ 
 
   return (
     <div>

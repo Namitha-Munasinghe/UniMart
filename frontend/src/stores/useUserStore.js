@@ -55,6 +55,7 @@ export const useUserStore = create((set, get) => ({
 			set({ checkingAuth: false, user: null });
 		}
 	},
+    
 
 	refreshToken: async () => {
 		set({ checkingAuth: true });

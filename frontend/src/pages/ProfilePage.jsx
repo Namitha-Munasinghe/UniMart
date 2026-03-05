@@ -90,7 +90,8 @@ const ProfilePage = () => {
               <h3 className="font-semibold text-gray-700">Rating</h3>
             </div>
             <p className="text-2xl font-bold text-gray-800">
-              {user.rating.toFixed(1)} ⭐
+              {/* {user.rating.toFixed(1)} ⭐   */}
+              {(user.rating ?? 0).toFixed(1)} ⭐
             </p>
             <p className="text-sm text-gray-500">
               Based on {user.totalReviews} reviews
