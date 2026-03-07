@@ -8,7 +8,7 @@ import { useUserStore } from "./stores/useUserStore";
 import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ProfilePage from "./pages/ProfilePage";
-
+import EditProfilePage from "./pages/EditProfilePage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -18,7 +18,6 @@ function App() {
   }, [checkAuth]);
 
   if (checkingAuth) return <LoadingSpinner />;
- 
 
   return (
     <div>
@@ -26,10 +25,23 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/signup" element={!user ? <SignUpPage /> : <Navigate to="/" />} />
-          <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route
+            path="/signup"
+            element={!user ? <SignUpPage /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/login"
+            element={!user ? <LoginPage /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/profile"
+            element={user ? <ProfilePage /> : <Navigate to="/login" />}
+          />
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+          <Route
+            path="/edit-profile"
+            element={user ? <EditProfilePage /> : <Navigate to="/login" />}
+          />
         </Routes>
       </div>
       <Toaster />

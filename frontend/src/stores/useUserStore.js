@@ -68,6 +68,24 @@ export const useUserStore = create((set, get) => ({
 			throw error;
 		}
 	},
+	updateProfile: async (data) => {
+  try {
+    set({ loading: true });
+
+    const res = await axios.put("/users/update-profile", data);
+
+    set({
+      user: res.data,
+      loading: false
+    });
+
+    toast.success("Profile updated successfully");
+
+  } catch (error) {
+    set({ loading: false });
+    toast.error(error.response?.data?.message || "Update failed");
+  }
+},
 }));
 
 let refreshPromise = null;

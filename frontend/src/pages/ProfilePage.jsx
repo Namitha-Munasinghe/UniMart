@@ -12,6 +12,7 @@ import {
   Edit,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
+import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
   const { user, logout } = useUserStore();
@@ -72,12 +73,14 @@ const ProfilePage = () => {
           </div>
 
           {/* Edit Button */}
-          <button
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition"
-          >
-            <Edit size={18} />
-            Edit Profile
-          </button>
+          <Link to="/edit-profile">
+            <button
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition"
+            >
+              <Edit size={18} />
+              Edit Profile
+            </button>
+          </Link>
         </div>
 
         {/* Stats Cards Section */}
