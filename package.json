@@ -20,6 +20,7 @@
     "express": "^5.2.1",
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
+    "leo-profanity": "^1.9.0",
     "mongoose": "^9.2.3",
     "openai": "^6.25.0",
     "stripe": "^20.4.0"
