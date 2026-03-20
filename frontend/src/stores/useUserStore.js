@@ -15,9 +15,10 @@ export const useUserStore = create((set, get) => ({
 			return toast.error("Passwords do not match");
 		}
 
-		try {
+	try {
 			const res = await axios.post("/auth/signup", { name, email, studentId, faculty, phone, password });
 			set({ user: res.data, loading: false });
+			toast.success("Profile created successfully");
 		} catch (error) {
 			set({ loading: false });
 			toast.error(error.response?.data?.message || "An error occurred");
@@ -30,6 +31,7 @@ export const useUserStore = create((set, get) => ({
 			const res = await axios.post("/auth/login", { email, password });
 
 			set({ user: res.data, loading: false });
+			toast.success("Login successful");
 		} catch (error) {
 			set({ loading: false });
 			toast.error(error.response?.data?.message || "An error occurred");
@@ -40,8 +42,23 @@ export const useUserStore = create((set, get) => ({
 		try {
 			await axios.post("/auth/logout");
 			set({ user: null });
+			toast.success("You have been logged out");
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred during logout");
+		}
+	},
+
+	deleteAccount: async () => {
+		try {
+			set({ loading: true });
+			const res = await axios.delete("/users/delete-account");
+			set({ user: null, loading: false });
+			toast.success(res.data?.message || "Account deleted successfully");
+			return true;
+		} catch (error) {
+			set({ loading: false });
+			toast.error(error.response?.data?.message || "Failed to delete account");
+			return false;
 		}
 	},
 

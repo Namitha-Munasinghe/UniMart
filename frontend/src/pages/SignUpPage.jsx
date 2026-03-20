@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useUserStore } from "../stores/useUserStore";
+import { toast } from "react-hot-toast";
 
 
 const SignUpPage = () => {
@@ -44,14 +45,51 @@ const SignUpPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    signup(formData);
+  const validateForm = () => {
+  const nameRegex = /^[A-Za-z\s'-]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const studentIdRegex = /^[A-Z]{2}\d{8}$/;
+  const phoneRegex = /^0\d{9}$/;
 
-    // setTimeout(() => {
-    //   console.log(formData);
-    // }, 2000);
-  };
+  if (!nameRegex.test(formData.name)) {
+    return "Name can only contain letters, spaces, hyphens, and apostrophes.";
+  }
+
+  if (!emailRegex.test(formData.email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (!studentIdRegex.test(formData.studentId)) {
+    return "Please enter a valid student ID (e.g. IT12345678)";
+  }
+
+  if (!phoneRegex.test(formData.phone)) {
+    return "Phone number must be 10 digits and start with 0.";
+  }
+
+  if (formData.password.length < 6) {
+    return "Password must be at least 6 characters.";
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    return "Passwords do not match.";
+  }
+
+  return null;
+};
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const error = validateForm();
+
+  if (error) {
+    toast.error(error);
+    return;
+  }
+
+  signup(formData);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4 py-10">

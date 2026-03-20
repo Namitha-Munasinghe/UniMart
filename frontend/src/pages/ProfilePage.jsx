@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -10,12 +10,14 @@ import {
   Star,
   ShieldCheck,
   Edit,
+  Trash2,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
 
 const ProfilePage = () => {
-  const { user, logout } = useUserStore();
+  const { user, logout, deleteAccount, loading } = useUserStore();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!user) return null;
 
@@ -162,8 +164,16 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Logout Section */}
-        <div className="mt-10 border-t pt-6 flex justify-end">
+        {/* Account Actions */}
+        <div className="mt-10 border-t pt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
+          >
+            <Trash2 size={18} />
+            Delete Account
+          </button>
+
           <button
             onClick={logout}
             className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
@@ -173,6 +183,40 @@ const ProfilePage = () => {
           </button>
         </div>
       </motion.div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
+            <h3 className="text-xl font-bold text-gray-800">Delete account?</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              This action will permanently delete your account. Do you want to continue?
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                disabled={loading}
+                onClick={async () => {
+                  const deleted = await deleteAccount();
+                  if (deleted) {
+                    setShowDeleteConfirm(false);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-70"
+              >
+                {loading ? "Deleting..." : "Yes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
