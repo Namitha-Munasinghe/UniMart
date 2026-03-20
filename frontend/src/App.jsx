@@ -37,7 +37,7 @@ function App() {
             path="/profile"
             element={user ? <ProfilePage /> : <Navigate to="/login" />}
           />
-          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} /> 
           <Route
             path="/edit-profile"
             element={user ? <EditProfilePage /> : <Navigate to="/login" />}
