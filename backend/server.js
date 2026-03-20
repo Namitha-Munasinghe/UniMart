@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json()); // Middleware to parse JSON request bodies
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Middleware to parse cookies
 
 app.use("/api/auth", authRoutes);
