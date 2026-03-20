@@ -15,11 +15,9 @@ export const submitReview = async (req, res) => {
     console.log("---- Debug End ----");
     
     try {
-        // Data ලබා ගැනීම
         const { buyerId, sellerId, rating, comment } = req.body;
         const proofImageURL = req.file ? req.file.path : null;
 
-        // Validation
         if (!buyerId || !sellerId || !rating || !comment) {
             return res.status(400).json({ 
                 success: false, 
@@ -27,7 +25,6 @@ export const submitReview = async (req, res) => {
             });
         }
 
-        // Groq AI Moderation
         const chatCompletion = await groq.chat.completions.create({
             messages: [
                 {
@@ -41,12 +38,10 @@ export const submitReview = async (req, res) => {
             model: "llama-3.3-70b-versatile",
         });
 
-        // AI Response එක parse කරන්න
         const text = chatCompletion.choices[0]?.message?.content || "";
         const jsonMatch = text.match(/\{.*\}/s);
         const aiAnalysis = JSON.parse(jsonMatch[0]);
 
-        // නරක content block කරන්න
         if (aiAnalysis.isFlagged) {
             return res.status(400).json({ 
                 success: false, 
@@ -54,7 +49,6 @@ export const submitReview = async (req, res) => {
             });
         }
 
-        // Database එකට Save කරන්න
         const newReview = new Review({ 
             buyerId, 
             sellerId, 
@@ -67,7 +61,6 @@ export const submitReview = async (req, res) => {
 
         await newReview.save();
 
-        // Success Response
         res.status(201).json({ 
             success: true, 
             message: `Review submitted! AI sentiment: ${aiAnalysis.sentiment}.`,
@@ -79,6 +72,36 @@ export const submitReview = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: "Server Error: " + error.message 
+        });
+    }
+};
+
+export const getSellerReviews = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        const reviews = await Review.find({ 
+            sellerId: sellerId,
+            isFlagged: false,
+        }).populate("buyerId", "name email profileImage");
+
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0 
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
+            : 0;
+
+        res.status(200).json({
+            success: true,
+            totalReviews,
+            averageRating,
+            data: reviews
+        });
+
+    } catch (error) {
+        console.error("Get Reviews Error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
         });
     }
 };
