@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
+import BuyerScheduleMeetingPage from "./pages/BuyerScheduleMeetingPage";
+import SellerScheduleMeetingPage from "./pages/SellerScheduleMeetingPage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -25,6 +27,9 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/schedule-meeting" element={<Navigate to="/schedule-meeting/buyer" replace />} />
+          <Route path="/schedule-meeting/buyer" element={<BuyerScheduleMeetingPage />} />
+          <Route path="/schedule-meeting/seller" element={<SellerScheduleMeetingPage />} />
           <Route
             path="/signup"
             element={!user ? <SignUpPage /> : <Navigate to="/" />}
