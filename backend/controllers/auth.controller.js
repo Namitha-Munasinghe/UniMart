@@ -80,30 +80,30 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1️⃣ Check if user exists
+    // Check if user exists
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // 2️⃣ Compare password using your model method
+    // Compare password using your model method
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // 3️⃣ Generate tokens
+    //Generate tokens
     const { accessToken, refreshToken } = generateToken(user._id);
 
-    // 4️⃣ Store refresh token in Redis
+    // Store refresh token in Redis
     await storeRefreshToken(user._id, refreshToken);
 
-    // 5️⃣ Set cookies
+    //  Set cookies
     setCookies(res, accessToken, refreshToken);
 
-    // 6️⃣ Send user data
+    // Send user data
     res.status(200).json({
       id: user._id,
       name: user.name,
