@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import axios from '../lib/axios';
-import { toast } from 'react-hot-toast'; // Import toast for notifications
-import { use } from 'react';
+import { toast } from 'react-hot-toast';
 
-export const useUserStore = create((set, get) => ({
+export const useUserStore = create((set) => ({
     user: null,
     loading: false,
     checkingAuth: true, // New state to track if we're checking auth status

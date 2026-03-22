@@ -1,94 +1,90 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Heart, Store } from "lucide-react";
 
 const Navbar = () => {
-  // 🔐 Simulated auth state
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false); // change to false to test normal user
-
-  const linkClass = "hover:text-indigo-600 transition";
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setIsAdmin(false);
   };
 
+  const navLinkClass = ({ isActive }) =>
+    `text-sm font-medium transition ${
+      isActive
+        ? "text-brand-700"
+        : "text-slate-600 hover:text-brand-600"
+    }`;
+
   return (
-    <nav className="bg-white shadow-md px-6 py-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <NavLink to="/" className="text-2xl font-bold text-indigo-600">
+    <nav className="sticky top-0 z-50 border-b border-brand-100/80 bg-white/90 backdrop-blur-md shadow-sm shadow-brand-100/50">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3.5">
+        <NavLink
+          to="/"
+          className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent"
+        >
           UniMart
         </NavLink>
 
-        {/* Center Links */}
-        {/* <div className="hidden md:flex space-x-8 text-gray-700 font-medium">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `${linkClass} ${isActive ? "text-indigo-600 font-semibold" : ""}`
-            }
-          >
+        <div className="hidden md:flex items-center gap-8">
+          <NavLink to="/" className={navLinkClass}>
             Home
           </NavLink>
-
-          <NavLink
-            to="/browse"
-            className={({ isActive }) =>
-              `${linkClass} ${isActive ? "text-indigo-600 font-semibold" : ""}`
-            }
-          >
-            Browse
+          <NavLink to="/shop" className={navLinkClass}>
+            Shop
           </NavLink>
-        </div> */}
+        </div>
 
-        {/* Right Section */}
-        {/* Right Section */}
-        <div className="flex items-center space-x-5 items-center">
-          <NavLink to="/favourites">
-            {/* <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" /> */}
-            <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition" />
+        <div className="flex items-center gap-4 md:gap-5">
+          <NavLink
+            to="/shop"
+            className="md:hidden flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-brand-50 hover:text-brand-700"
+            aria-label="Shop"
+          >
+            <Store className="w-6 h-6" />
+          </NavLink>
+
+          <NavLink to="/favourites" aria-label="Favourites">
+            <Heart className="w-6 h-6 text-slate-600 hover:text-rose-500 cursor-pointer transition" />
           </NavLink>
 
           {!isLoggedIn ? (
             <>
               <NavLink
                 to="/login"
-                className="text-gray-700 hover:text-indigo-600 font-medium"
+                className="text-slate-600 hover:text-brand-600 font-medium text-sm"
               >
                 Sign In
               </NavLink>
-
               <NavLink
                 to="/signup"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white px-4 py-2 text-sm font-semibold shadow-sm hover:from-brand-500 hover:to-indigo-500 transition"
               >
                 Sign Up
               </NavLink>
             </>
           ) : (
             <>
-              {/* 👤 Profile FIRST */}
-              <NavLink to="/profile">
-                <User className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" />
+              <NavLink to="/profile" aria-label="Profile">
+                <User className="w-6 h-6 text-slate-600 hover:text-brand-600 cursor-pointer transition" />
               </NavLink>
 
-              {/* 👑 Admin AFTER Profile */}
               {isAdmin && (
                 <NavLink
                   to="/admin"
-                  className="hidden md:flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+                  className="hidden md:flex items-center gap-2 rounded-xl bg-amber-500 text-white px-4 py-2 text-sm font-semibold hover:bg-amber-600 transition"
                 >
                   <LayoutDashboard size={18} />
                   Admin
                 </NavLink>
               )}
 
-              {/* Logout */}
               <button
+                type="button"
                 onClick={handleLogout}
-                className="hidden md:flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="hidden md:flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-semibold text-brand-800 hover:bg-brand-50 transition"
               >
                 <LogOut size={18} />
                 Logout
