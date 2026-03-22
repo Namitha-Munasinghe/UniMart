@@ -276,7 +276,7 @@ const BuyerScheduleMeetingPage = () => {
             <div className="space-y-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-semibold text-indigo-700">
                 <CalendarRange size={16} />
-                Buyer View
+                Buying
               </span>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
@@ -291,7 +291,7 @@ const BuyerScheduleMeetingPage = () => {
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                Buy Product
+                Product
               </p>
               <div className="mt-2 flex items-center gap-2">
                 <Badge label="Iphone 13" tone="blue" />
@@ -500,12 +500,7 @@ const BuyerScheduleMeetingPage = () => {
                     </div>
 
                     <div className="flex items-center gap-3 border-t border-slate-200 px-5 py-4">
-                      <button
-                        type="button"
-                        className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600"
-                      >
-                        <Paperclip size={16} />
-                      </button>
+                     
                       <input
                         type="text"
                         placeholder="Type a message..."

@@ -47,7 +47,7 @@ const SignUpPage = () => {
 
   const validateForm = () => {
   const nameRegex = /^[A-Za-z\s'-]+$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@my\.sliit\.lk$/;
   const studentIdRegex = /^[A-Z]{2}\d{8}$/;
   const phoneRegex = /^0\d{9}$/;
 

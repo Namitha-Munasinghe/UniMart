@@ -2,10 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import {
   CalendarRange,
-  MessageCircle,
-  Paperclip,
+  
   Send,
-  ShieldCheck,
+  
 } from "lucide-react";
 
 const sellerStats = [
@@ -14,21 +13,21 @@ const sellerStats = [
   { label: "Ignored Requests", value: "2", valueClassName: "text-slate-500" },
 ];
 
-const sellerTabs = ["Requests", "Responses", "Chat", "History"];
+const sellerTabs = ["Requests", "Chat", "History"];
 
 const incomingRequests = [
   {
     initials: "A",
     avatarTone: "blue",
-    name: "Amara Silva",
+    name: "Kamal Perera",
     badge: { label: "New", tone: "amber" },
     lines: [
-      ["Samsung A54", "Mar 25, 10:00 AM", "Library Block A"],
-      ["30 min", "Product Inspection"],
+      ["iphone 13pro", "Mar 25, 10:00 AM"],
+      ["30 min", "New Building"],
     ],
-    note: "\"I'd like to check the screen and battery before deciding.\"",
+    
     noteTone: "muted",
-    actions: ["Accept", "Ignore"],
+    actions: ["Accept", "Ignore","Message"],
   },
   {
     initials: "R",
@@ -36,9 +35,9 @@ const incomingRequests = [
     name: "Rashida M.",
     lines: [
       ["Engineering Textbooks", "Mar 26, 2:00 PM"],
-      ["15 min", "Price Negotiation", "SLIIT Canteen"],
+      ["15 min", "SLIIT Canteen"],
     ],
-    actions: ["Accept", "Ignore"],
+    actions: ["Accept", "Ignore","Message"],
   },
   {
     initials: "D",
@@ -47,11 +46,11 @@ const incomingRequests = [
     badge: { label: "Reschedule", tone: "blue" },
     lines: [
       ["Dell Laptop Stand", "Mar 28, 3:30 PM"],
-      ["20 min", "Final Exchange", "Main Lobby"],
+      ["20 min", "Main Building"],
     ],
-    note: "Previously scheduled for Mar 22 - rescheduled by buyer",
-    noteTone: "warn",
-    actions: ["Accept", "Ignore"],
+    
+    
+    actions: ["Accept", "Ignore","Message"],
   },
 ];
 
@@ -59,14 +58,14 @@ const sellerResponses = [
   {
     title: "Accepted Request",
     buyer: "Tharuka W.",
-    details: "Scientific Calculator - Mar 24, 2:00 PM - Main Lobby",
+    details: "Scientific Calculator - Mar 24, 2:00 PM - Main Building",
     tone: "green",
     status: "Accepted",
   },
   {
     title: "Waiting for Seller Action",
     buyer: "Amara Silva",
-    details: "Samsung A54 - Mar 25, 10:00 AM - Library Block A",
+    details: "Samsung A54 - Mar 25, 10:00 AM - New Building",
     tone: "amber",
     status: "Pending",
   },
@@ -80,9 +79,9 @@ const sellerResponses = [
 ];
 
 const sellerMessages = [
-  { side: "recv", initials: "A", tone: "blue", text: "Hi! Is the Samsung A54 still available? What's the condition like?", time: "9:50 AM" },
-  { side: "sent", text: "Yes, it's available! Screen is perfect, only a minor scratch on the back. Comes with the original box.", time: "9:53 AM" },
-  { side: "recv", initials: "A", tone: "blue", text: "Sent a meeting request for Mar 25 at Library Block A. Please confirm!", time: "9:55 AM" },
+  { side: "recv", initials: "K", tone: "blue", text: "Is there any flexibility in the price ", time: "9:50 AM" },
+  { side: "sent", text: "Im firm on the price since i just posted it", time: "9:53 AM" },
+  
 ];
 
 const sectionCardClass =
@@ -192,32 +191,26 @@ const SellerScheduleMeetingPage = () => {
             <div className="space-y-3">
               <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-semibold text-indigo-700">
                 <CalendarRange size={16} />
-                Seller View
+                Selling
               </span>
               <div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-                  Seller request response flow
+                  Lets Get Your Items Sold!
                 </h1>
                 <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
-                  This static page shows the seller-side experience where buyer meeting requests are reviewed and either accepted or ignored.
+                  Connect with potential buyers to confirm inspections and price negotiations. Stay on top of your pending requests to close deals faster.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Current State</p>
-              <div className="mt-2 flex items-center gap-2">
-                <Badge label="Seller View" tone="green" />
-                <p className="text-sm font-medium text-slate-700">Static frontend, ready for API hookup</p>
-              </div>
-            </div>
+            
           </div>
         </section>
 
         <section className="space-y-6">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-slate-900">Meeting Scheduler</h2>
-            <Badge label="Seller View" tone="green" />
+            
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -236,7 +229,7 @@ const SellerScheduleMeetingPage = () => {
                   <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                     <h3 className="text-lg font-semibold text-slate-900">Requests (3)</h3>
                     <button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-600">
-                      Filter
+                      Newest First
                     </button>
                   </div>
                   <div className="divide-y divide-slate-100 px-6 py-2">
@@ -289,7 +282,7 @@ const SellerScheduleMeetingPage = () => {
                 <div className={sectionCardClass}>
                   <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                     <h3 className="text-lg font-semibold text-slate-900">Buyer Request Status</h3>
-                    <Badge label="Seller Action Only" tone="gray" />
+                    
                   </div>
                   <div className="space-y-4 px-6 py-5">
                     {sellerResponses.map((item) => (
@@ -322,17 +315,7 @@ const SellerScheduleMeetingPage = () => {
             </div>
 
             <div className="space-y-6">
-              <div>
-                <SectionLabel>Seller Rule</SectionLabel>
-                <div className={`${sectionCardClass} px-6 py-5`}>
-                  <div className="rounded-2xl bg-slate-50 p-4">
-                    <p className="text-sm font-semibold text-slate-900">Buyer controls the request</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      The buyer selects the date, time, and location. The seller only reviews that request and chooses whether to accept it or ignore it.
-                    </p>
-                  </div>
-                </div>
-              </div>
+        
 
               <div>
                 <SectionLabel>Chat with Buyer</SectionLabel>
@@ -340,7 +323,7 @@ const SellerScheduleMeetingPage = () => {
                   <div className="border-b border-slate-200 px-5 pt-4">
                     <div className="flex gap-3 overflow-x-auto pb-4">
                       {[
-                        { initials: "A", tone: "blue", active: true, online: true, name: "Amara" },
+                        { initials: "K", tone: "blue", active: true, online: true, name: "Kamal" },
                         { initials: "D", tone: "amber", name: "Dilshan" },
                         { initials: "R", tone: "violet", online: true, name: "Rashida" },
                       ].map((person) => (
@@ -359,10 +342,10 @@ const SellerScheduleMeetingPage = () => {
 
                   <div className="flex h-[340px] flex-col">
                     <div className="flex items-center gap-3 border-b border-indigo-200 bg-indigo-50 px-5 py-4">
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>A</div>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>K</div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-900">Amara Silva</p>
-                        <p className="text-xs text-slate-500">Samsung Galaxy A54</p>
+                        <p className="text-sm font-semibold text-slate-900">Kamal Perera</p>
+                        <p className="text-xs text-slate-500">iphone 13pro</p>
                       </div>
                       <Badge label="Pending Request" tone="amber" />
                     </div>
@@ -372,28 +355,11 @@ const SellerScheduleMeetingPage = () => {
                         <MessageBubble key={`${message.time}-${index}`} message={message} />
                       ))}
 
-                      <div className="max-w-[90%] rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm">
-                        <p className="font-semibold text-amber-700">Buyer Meeting Request</p>
-                        <div className="mt-2 space-y-1 text-slate-700">
-                          <p>March 25, 2026 - 10:00 AM</p>
-                          <p>Library Block A - 30 min</p>
-                          <p>Product Inspection</p>
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          <button type="button" className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white">
-                            Accept
-                          </button>
-                          <button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600">
-                            Ignore
-                          </button>
-                        </div>
-                      </div>
+                      
                     </div>
 
                     <div className="flex items-center gap-3 border-t border-slate-200 px-5 py-4">
-                      <button type="button" className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:border-indigo-300 hover:text-indigo-600">
-                        <Paperclip size={16} />
-                      </button>
+                      
                       <input
                         type="text"
                         placeholder="Type a message..."
@@ -410,32 +376,7 @@ const SellerScheduleMeetingPage = () => {
           </div>
         </section>
 
-        <section className="rounded-[28px] border border-slate-200 bg-white px-6 py-6 shadow-sm">
-          <div className="flex items-center gap-2 text-indigo-700">
-            <ShieldCheck size={18} />
-            <h2 className="text-sm font-bold uppercase tracking-[0.18em]">Design Notes</h2>
-          </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Color System</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Indigo primary, emerald success, amber warning, and cool slate surfaces.
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Components</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Seller response cards, request summaries, and chat panels.
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Implementation</p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                The seller does not pick a date or time here. They only accept or ignore the buyer request.
-              </p>
-            </div>
-          </div>
-        </section>
+       
       </motion.div>
     </div>
   );

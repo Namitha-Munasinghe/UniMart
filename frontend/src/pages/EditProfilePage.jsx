@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Save, Loader, User } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
+import { toast } from "react-hot-toast";
 
 const EditProfilePage = () => {
   const { user, updateProfile, loading } = useUserStore();
@@ -11,6 +12,13 @@ const EditProfilePage = () => {
     phone: "",
     faculty: "",
   });
+
+  const faculties = [
+    "Faculty of Computing",
+    "SLIIT Business School",
+    "Faculty of Engineering",
+    "Faculty of Humanities and Sciences",
+  ];
 
   useEffect(() => {
     if (user) {
@@ -31,7 +39,27 @@ const EditProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const errorMessage = validateForm();
+    if (errorMessage) {
+      toast.error(errorMessage);
+      return;
+    }
+
     await updateProfile(formData);
+  };
+
+  const validateForm = () => {
+    const nameRegex = /^[A-Za-z\s'-]+$/;
+    const phoneRegex = /^0\d{9}$/;
+
+    if (!nameRegex.test(formData.name)) {
+      return "Name can only contain letters, spaces, hyphens, and apostrophes.";
+    }
+    if (!phoneRegex.test(formData.phone)) {
+      return "Phone number must be 10 digits and start with 0.";
+    }
+    return null;
   };
 
   return (
@@ -47,7 +75,6 @@ const EditProfilePage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-
           {/* Name */}
           <div>
             <label className="text-sm font-medium">Full Name</label>
@@ -77,14 +104,20 @@ const EditProfilePage = () => {
           {/* Faculty */}
           <div>
             <label className="text-sm font-medium">Faculty</label>
-            <input
-              type="text"
+            <select
               name="faculty"
               required
               value={formData.faculty}
               onChange={handleChange}
               className="w-full border rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            >
+              <option value="">Select Faculty</option>
+              {faculties.map((faculty, index) => (
+                <option key={index} value={faculty}>
+                  {faculty}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Read Only Fields */}
