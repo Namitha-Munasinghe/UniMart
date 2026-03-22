@@ -1,52 +1,41 @@
-import Groq from "groq-sdk";
+import Groq from "groq-sdk";//import Groq AI library 
 import Review from "../model/review.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-// Groq Setup
+// initialize with API key
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export const submitReview = async (req, res) => {
-    console.log("---- Debug Start ----");
-    console.log("Headers:", req.headers['content-type']);
-    console.log("Body:", req.body);
-    console.log("File:", req.file ? "Image Received" : "No Image");
-    console.log("---- Debug End ----");
-    
     try {
-        // Data ලබා ගැනීම
         const { buyerId, sellerId, rating, comment } = req.body;
-        const proofImageURL = req.file ? req.file.path : null;
+        const proofImages = req.files ? req.files.map(f => f.path) : [];// Extract Cloudinary URLs from uploaded files as an array
 
-        // Validation
         if (!buyerId || !sellerId || !rating || !comment) {
             return res.status(400).json({ 
                 success: false, 
                 message: "All fields are required." 
             });
         }
-
-        // Groq AI Moderation
+        
+        //send review comment to Groq AI for moderation and sentiment analysis
         const chatCompletion = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "user",
-                    content: `Analyze this product review: "${comment}". 
-                    Respond ONLY with a JSON object, no extra text: 
-                    {"isFlagged": boolean, "sentiment": "positive" or "negative" or "neutral"}. 
-                    Set isFlagged to true if it contains hate speech or severe profanity.`
-                }
-            ],
+            messages: [{
+                role: "user",
+                content: `Analyze this product review: "${comment}". 
+                Respond ONLY with a JSON object, no extra text: 
+                {"isFlagged": boolean, "sentiment": "positive" or "negative" or "neutral"}. 
+                Set isFlagged to true if it contains hate speech or severe profanity.`
+            }],
             model: "llama-3.3-70b-versatile",
         });
 
-        // AI Response එක parse කරන්න
-        const text = chatCompletion.choices[0]?.message?.content || "";
-        const jsonMatch = text.match(/\{.*\}/s);
-        const aiAnalysis = JSON.parse(jsonMatch[0]);
+        const text = chatCompletion.choices[0]?.message?.content || "";// Extract JSON from AI response
+        const jsonMatch = text.match(/\{.*\}/s);// Use regex to find JSON object in the response
+        const aiAnalysis = JSON.parse(jsonMatch[0]);// Parse the JSON string into an object
 
-        // නරක content block කරන්න
+        // If AI flags the review, block it and return an error response
         if (aiAnalysis.isFlagged) {
             return res.status(400).json({ 
                 success: false, 
@@ -54,20 +43,18 @@ export const submitReview = async (req, res) => {
             });
         }
 
-        // Database එකට Save කරන්න
         const newReview = new Review({ 
             buyerId, 
             sellerId, 
             rating, 
             comment,
-            proofImage: proofImageURL,
+            proofImages: proofImages,
             sentiment: aiAnalysis.sentiment, 
             isFlagged: aiAnalysis.isFlagged 
         });
 
         await newReview.save();
 
-        // Success Response
         res.status(201).json({ 
             success: true, 
             message: `Review submitted! AI sentiment: ${aiAnalysis.sentiment}.`,
@@ -79,6 +66,112 @@ export const submitReview = async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: "Server Error: " + error.message 
+        });
+    }
+};
+
+export const getSellerReviews = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        const reviews = await Review.find({ 
+            sellerId: sellerId,
+            isFlagged: false,
+        }).populate("buyerId", "name email profileImage");
+
+        const totalReviews = reviews.length;
+        const averageRating = totalReviews > 0 
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
+            : 0;
+
+        res.status(200).json({
+            success: true,
+            totalReviews,
+            averageRating,
+            data: reviews
+        });
+
+    } catch (error) {
+        console.error("Get Reviews Error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
+        });
+    }
+};
+
+export const getAllReviewsAdmin = async (req, res) => {
+    try {
+        const reviews = await Review.find({})
+            .populate("buyerId", "name email")
+            .populate("sellerId", "name email")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            totalReviews: reviews.length,
+            data: reviews
+        });
+
+    } catch (error) {
+        console.error("Admin Get Reviews Error:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
+        });
+    }
+};
+
+export const approveReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const review = await Review.findByIdAndUpdate(
+            id,
+            { adminStatus: "approved" },
+            { new: true }
+        );
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: "Review not found."
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Review approved!",
+            data: review
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
+        });
+    }
+};
+
+export const rejectReview = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const review = await Review.findByIdAndUpdate(
+            id,
+            { adminStatus: "rejected" },
+            { new: true }
+        );
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: "Review not found."
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Review rejected!",
+            data: review
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
         });
     }
 };

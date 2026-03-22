@@ -9,6 +9,9 @@ import { useEffect } from "react";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
+import SubmitReviewPage from "./pages/SubmitReviewPage";
+import SellerReviewsPage from "./pages/SellerReviewsPage";
+import AdminReviewsPage from "./pages/AdminReviewsPage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -37,11 +40,14 @@ function App() {
             path="/profile"
             element={user ? <ProfilePage /> : <Navigate to="/login" />}
           />
-          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} /> 
           <Route
             path="/edit-profile"
             element={user ? <EditProfilePage /> : <Navigate to="/login" />}
           />
+          <Route path="/submit-review" element={<SubmitReviewPage />} />
+          <Route path="/seller-reviews" element={<SellerReviewsPage />} />
+          <Route path="/admin-reviews" element={<AdminReviewsPage />} />
+          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
         </Routes>
       </div>
       <Toaster />

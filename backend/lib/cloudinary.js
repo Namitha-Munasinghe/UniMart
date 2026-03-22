@@ -16,7 +16,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'UniMart_Reviews', // Cloudinary එකේ හැදෙන folder එකේ නම
+        folder: 'UniMart_Reviews', 
         allowed_formats: ['jpg', 'png', 'jpeg'],
     },
 });
