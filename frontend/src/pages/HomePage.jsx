@@ -7,6 +7,8 @@ import {
   ShieldCheck,
   Users,
   ArrowRight,
+  Package,
+  PlusCircle,
 } from "lucide-react";
 
 const fadeUp = {
@@ -94,6 +96,29 @@ const HomePage = () => {
 
         <motion.div
           custom={4}
+          initial="hidden"
+          animate="show"
+          variants={fadeUp}
+          className="mt-4 flex flex-wrap gap-4"
+        >
+          <Link
+            to="/my-products"
+            className="inline-flex items-center gap-2 rounded-xl border border-violet-300/30 bg-violet-500/15 px-6 py-3 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/25"
+          >
+            <Package className="h-5 w-5" />
+            My Products
+          </Link>
+          <Link
+            to="/my-products/new"
+            className="inline-flex items-center gap-2 rounded-xl border border-indigo-300/30 bg-indigo-500/15 px-6 py-3 text-sm font-semibold text-indigo-100 transition hover:bg-indigo-500/25"
+          >
+            <PlusCircle className="h-5 w-5" />
+            Add Product
+          </Link>
+        </motion.div>
+
+        <motion.div
+          custom={5}
           initial="hidden"
           animate="show"
           variants={fadeUp}
