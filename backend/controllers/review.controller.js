@@ -79,7 +79,9 @@ export const getSellerReviews = async (req, res) => {
             isFlagged: false,
         }).populate("buyerId", "name email profileImage");
 
+        // Calculate average rating and total reviews for the seller
         const totalReviews = reviews.length;
+        
         const averageRating = totalReviews > 0 
             ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
             : 0;
@@ -169,6 +171,86 @@ export const rejectReview = async (req, res) => {
             data: review
         });
     } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server Error: " + error.message
+        });
+    }
+};
+
+
+export const getSellerTrustScore = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        const reviews = await Review.find({ 
+            sellerId: sellerId,
+            isFlagged: false 
+        });
+
+        const totalReviews = reviews.length;
+
+        if (totalReviews === 0) {
+            return res.status(200).json({
+                success: true,
+                trustScore: 0,
+                grade: "No Reviews Yet",
+                breakdown: {
+                    averageRating: 0,
+                    totalReviews: 0,
+                    positivePercent: 0,
+                    notFlaggedPercent: 100
+                }
+            });
+        }
+
+        // 1. Average Rating Score (40%)
+        const averageRating = reviews.reduce(
+            (sum, r) => sum + r.rating, 0) / totalReviews;
+        const ratingScore = (averageRating / 5) * 40;
+
+        // 2. Total Reviews Score (20%)
+        const reviewScore = Math.min(totalReviews / 50, 1) * 20;
+
+        // 3. Positive % Score (25%)
+        const positiveCount = reviews.filter(
+            r => r.sentiment === "positive").length;
+        const positivePercent = (positiveCount / totalReviews) * 100;
+        const positiveScore = (positivePercent / 100) * 25;
+
+        // 4. Not Flagged % Score (15%)
+        const allReviews = await Review.find({ sellerId });
+        const notFlaggedPercent = totalReviews > 0
+            ? (totalReviews / allReviews.length) * 100
+            : 100;
+        const flagScore = (notFlaggedPercent / 100) * 15;
+
+        // Total Trust Score
+        const trustScore = Math.round(
+            ratingScore + reviewScore + positiveScore + flagScore
+        );
+
+        // Grade
+        let grade = "";
+        if (trustScore >= 80) grade = "Excellent ⭐";
+        else if (trustScore >= 60) grade = "Good 👍";
+        else if (trustScore >= 40) grade = "Average 😐";
+        else grade = "Needs Improvement ⚠️";
+
+        res.status(200).json({
+            success: true,
+            trustScore,
+            grade,
+            breakdown: {
+                averageRating: averageRating.toFixed(1),
+                totalReviews,
+                positivePercent: Math.round(positivePercent),
+                notFlaggedPercent: Math.round(notFlaggedPercent)
+            }
+        });
+
+    } catch (error) {
+        console.error("Trust Score Error:", error.message);
         res.status(500).json({
             success: false,
             message: "Server Error: " + error.message
