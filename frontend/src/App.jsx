@@ -24,32 +24,34 @@ function App() {
 
   return (
     <div>
-      <div>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/signup"
-            element={!user ? <SignUpPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/login"
-            element={!user ? <LoginPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/profile"
-            element={user ? <ProfilePage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/edit-profile"
-            element={user ? <EditProfilePage /> : <Navigate to="/login" />}
-          />
-          <Route path="/submit-review" element={<SubmitReviewPage />} />
-          <Route path="/seller-reviews" element={<SellerReviewsPage />} />
-          <Route path="/admin-reviews" element={<AdminReviewsPage />} />
-          <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
-        </Routes>
-      </div>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/signup"
+          element={!user ? <SignUpPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/login"
+          element={!user ? <LoginPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/profile"
+          element={user ? <ProfilePage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/edit-profile"
+          element={user ? <EditProfilePage /> : <Navigate to="/login" />}
+        />
+        
+        {/* ⭐ Review Routes - මෙතන තමයි වෙනස තියෙන්නේ */}
+        <Route path="/submit-review" element={<SubmitReviewPage />} />
+        <Route path="/seller/:sellerId" element={<SellerReviewsPage />} /> 
+        <Route path="/admin-reviews" element={<AdminReviewsPage />} />
+
+        {/* 404 / Redirect logic */}
+        <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+      </Routes>
       <Toaster />
     </div>
   );

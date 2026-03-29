@@ -5,7 +5,8 @@ import {
     getAllReviewsAdmin,
     approveReview,
     rejectReview,
-    getSellerTrustScore
+    getSellerTrustScore,
+    getSellerSummary // 👈 මේක අනිවාර්යයෙන්ම මෙතනට එකතු කරන්න!
 } from "../controllers/review.controller.js";
 import upload from "../lib/cloudinary.js";
 
@@ -19,6 +20,9 @@ router.get('/seller/:sellerId', getSellerReviews);
 
 // Trust Score ගන්නවා
 router.get('/trust-score/:sellerId', getSellerTrustScore);
+
+// AI Summary & Tags ගන්නවා
+router.get("/summary/:sellerId", getSellerSummary); // ✅ දැන් මේක වැඩ කරනවා
 
 // Admin Routes
 router.get('/admin/all', getAllReviewsAdmin);
