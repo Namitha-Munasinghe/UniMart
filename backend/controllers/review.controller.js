@@ -83,6 +83,77 @@ export const submitReview = async (req, res) => {
 };
 
 /**
+ * @desc    AI Task: Suggest a professional reply based on review sentiment
+ * @route   POST /api/reviews/suggest-reply
+ */
+export const generateAIReply = async (req, res) => {
+    try {
+        const { reviewId } = req.body;
+        const review = await Review.findById(reviewId);
+
+        if (!review) {
+            return res.status(404).json({ success: false, message: "Review not found" });
+        }
+
+        // AI Prompt to generate a professional reply
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [{
+                role: "user",
+                content: `A customer left this ${review.sentiment} review with a ${review.rating}-star rating: "${review.comment}". 
+                As the seller, write a professional, short, and polite reply in English. 
+                If positive, thank them. If negative, apologize and offer help.
+                Respond ONLY with a JSON object: {"suggestedReply": "your reply text here"}`
+            }],
+            model: "llama-3.3-70b-versatile",
+        });
+
+        const text = chatCompletion.choices[0]?.message?.content || "";
+        const jsonMatch = text.match(/\{.*\}/s);
+        const aiResponse = JSON.parse(jsonMatch[0]);
+        
+        res.status(200).json(aiResponse);
+
+    } catch (error) {
+        console.error("AI Reply Generation Error:", error);
+        res.status(500).json({ success: false, message: "Failed to generate AI reply" });
+    }
+};
+
+/**
+ * @desc    Save the seller's reply to a review
+ * @route   PUT /api/reviews/reply/:id
+ */
+export const submitSellerReply = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { replyText } = req.body;
+
+        const updatedReview = await Review.findByIdAndUpdate(
+            id,
+            { 
+                sellerReply: replyText,
+                replyAt: Date.now()
+            },
+            { new: true }
+        );
+
+        if (!updatedReview) {
+            return res.status(404).json({ success: false, message: "Review not found" });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: "Reply submitted successfully", 
+            data: updatedReview 
+        });
+
+    } catch (error) {
+        console.error("Submit Reply Error:", error.message);
+        res.status(500).json({ success: false, message: "Server Error: " + error.message });
+    }
+};
+
+/**
  * @desc    Get all non-flagged reviews for a specific seller
  * @route   GET /api/reviews/seller/:sellerId
  */

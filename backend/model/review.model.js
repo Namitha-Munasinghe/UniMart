@@ -22,6 +22,15 @@ const reviewSchema = new mongoose.Schema({
         required: true 
     },
     
+    // ✅ Seller's Response Section
+    sellerReply: { 
+        type: String, 
+        default: "" 
+    },
+    replyAt: { 
+        type: Date 
+    },
+
     // ✅ Multiple Images - Array of Cloudinary URLs
     proofImages: { 
         type: [String], 
