@@ -30,9 +30,8 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/schedule-meeting" element={<Navigate to="/schedule-meeting/buyer" replace />} />
-          <Route path="/schedule-meeting/buyer" element={<BuyerScheduleMeetingPage />} />
-          <Route path="/schedule-meeting/seller" element={<SellerScheduleMeetingPage />} />
+          <Route path="/schedule-meeting/buyer" element={user?<BuyerScheduleMeetingPage />:<Navigate to="/" />} />
+          <Route path="/schedule-meeting/seller" element={user?<SellerScheduleMeetingPage />:<Navigate to="/" />} />
           <Route
             path="/signup"
             element={!user ? <SignUpPage /> : <Navigate to="/" />}
