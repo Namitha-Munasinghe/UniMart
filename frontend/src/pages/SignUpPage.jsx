@@ -47,7 +47,7 @@ const SignUpPage = () => {
 
   const validateForm = () => {
   const nameRegex = /^[A-Za-z\s'-]+$/;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@my\.sliit\.lk$/;
   const studentIdRegex = /^[A-Z]{2}\d{8}$/;
   const phoneRegex = /^0\d{9}$/;
 
@@ -134,7 +134,7 @@ const handleSubmit = (e) => {
             <input
               type="email"
               name="email"
-              placeholder="Student Email"
+              placeholder="Student Email (example@my.sliit.lk)"
               value={formData.email}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -148,7 +148,7 @@ const handleSubmit = (e) => {
             <input
               type="text"
               name="studentId"
-              placeholder="Student ID"
+              placeholder="Student ID "
               value={formData.studentId}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
