@@ -2,7 +2,7 @@ import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
 
-export const useUserStore = create((set, get) => ({
+export const useUserStore = create((set) => ({
 	user: null,
 	loading: false,
 	checkingAuth: true,
@@ -33,7 +33,7 @@ export const useUserStore = create((set, get) => ({
 			set({ user: res.data, loading: false });
 			toast.success("Login successful");
 		} catch (error) {
-			set({ loading: false });
+			set({ user: null, loading: false });
 			toast.error(error.response?.data?.message || "An error occurred");
 		}
 	},
@@ -65,10 +65,11 @@ export const useUserStore = create((set, get) => ({
 	checkAuth: async () => {
 		set({ checkingAuth: true });
 		try {
-			const response = await axios.get("/auth/profile");
+			const response = await axios.get("/auth/profile", {
+				skipAuthRefresh: true,
+			});
 			set({ user: response.data, checkingAuth: false });
-		} catch (error) {
-			console.log(error.message);
+		} catch {
 			set({ checkingAuth: false, user: null });
 		}
 	},
@@ -109,14 +110,15 @@ let refreshPromise = null;
 
 axios.interceptors.response.use(
 	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-		if (
-			error.response?.status === 401 &&
-			!originalRequest._retry &&
-			originalRequest?.url !== "/auth/refresh-token"
-		) {
-			originalRequest._retry = true;
+		async (error) => {
+			const originalRequest = error.config;
+			if (
+				error.response?.status === 401 &&
+				!originalRequest?.skipAuthRefresh &&
+				!originalRequest._retry &&
+				originalRequest?.url !== "/auth/refresh-token"
+			) {
+				originalRequest._retry = true;
 
 			try {
 				if (refreshPromise) {
