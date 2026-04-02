@@ -17,10 +17,6 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.use(cookieParser()); // Middleware to parse cookies
 
-// Serve uploaded product images from local filesystem.
-// Frontend/backend can refer to them using paths like `/uploads/products/<filename>`.
-app.use("/uploads", express.static("backend/uploads"));
-
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 
