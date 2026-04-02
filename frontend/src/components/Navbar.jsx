@@ -1,74 +1,90 @@
-// Navbar.jsx
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
-import { useUserStore } from "../stores/useUserStore";
-import unimart from "../assets/unimart.png";
+import { User, LogOut, LayoutDashboard, Heart, Store } from "lucide-react";
 
 const Navbar = () => {
-  const { user, logout } = useUserStore(); // make sure your store has a logout function
-
-  const isAdmin = user?.role === "admin";
-  const linkClass = "hover:text-indigo-600 transition";
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleLogout = () => {
-    logout(); // call store logout
+    setIsLoggedIn(false);
+    setIsAdmin(false);
   };
 
+  const navLinkClass = ({ isActive }) =>
+    `text-sm font-medium transition ${
+      isActive
+        ? "text-brand-700"
+        : "text-slate-600 hover:text-brand-600"
+    }`;
+
   return (
-    <nav className="bg-white shadow-md px-6 py-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center text-2xl font-bold text-indigo-600">
-          <img src={unimart} alt="UniMart" className="w-8 h-8 mr-2" />
+    <nav className="sticky top-0 z-50 border-b border-brand-100/80 bg-white/90 backdrop-blur-md shadow-sm shadow-brand-100/50">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-3.5">
+        <NavLink
+          to="/"
+          className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-600 to-indigo-600 bg-clip-text text-transparent"
+        >
           UniMart
         </NavLink>
 
-        <div className="flex items-center space-x-5">
-          {/* Favorites / Heart */}
-          <NavLink to="/favourites">
-            <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition" />
+        <div className="hidden md:flex items-center gap-8">
+          <NavLink to="/" className={navLinkClass}>
+            Home
+          </NavLink>
+          <NavLink to="/shop" className={navLinkClass}>
+            Shop
+          </NavLink>
+        </div>
+
+        <div className="flex items-center gap-4 md:gap-5">
+          <NavLink
+            to="/shop"
+            className="md:hidden flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-brand-50 hover:text-brand-700"
+            aria-label="Shop"
+          >
+            <Store className="w-6 h-6" />
           </NavLink>
 
-          {/* Auth Links */}
-          {!user ? (
+          <NavLink to="/favourites" aria-label="Favourites">
+            <Heart className="w-6 h-6 text-slate-600 hover:text-rose-500 cursor-pointer transition" />
+          </NavLink>
+
+          {!isLoggedIn ? (
             <>
               <NavLink
                 to="/login"
-                className="text-gray-700 hover:text-indigo-600 font-medium"
+                className="text-slate-600 hover:text-brand-600 font-medium text-sm"
               >
                 Sign In
               </NavLink>
-
               <NavLink
                 to="/signup"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white px-4 py-2 text-sm font-semibold shadow-sm hover:from-brand-500 hover:to-indigo-500 transition"
               >
                 Sign Up
               </NavLink>
             </>
           ) : (
             <>
-              {/* Profile */}
-              <NavLink to="/profile">
-                <User className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" />
+              <NavLink to="/profile" aria-label="Profile">
+                <User className="w-6 h-6 text-slate-600 hover:text-brand-600 cursor-pointer transition" />
               </NavLink>
 
-              {/* Admin Link */}
               {isAdmin && (
                 <NavLink
                   to="/admin"
-                  className="hidden md:flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+                  className="hidden md:flex items-center gap-2 rounded-xl bg-amber-500 text-white px-4 py-2 text-sm font-semibold hover:bg-amber-600 transition"
                 >
                   <LayoutDashboard size={18} />
                   Admin
                 </NavLink>
               )}
 
-              {/* Logout */}
               <button
+                type="button"
                 onClick={handleLogout}
-                className="hidden md:flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="hidden md:flex items-center gap-2 rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-semibold text-brand-800 hover:bg-brand-50 transition"
               >
                 <LogOut size={18} />
                 Logout
