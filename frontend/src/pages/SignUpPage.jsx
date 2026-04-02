@@ -13,14 +13,13 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useUserStore } from "../stores/useUserStore";
-import { toast } from "react-hot-toast";
 
 
 const SignUpPage = () => {
-  
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     studentId: "",
     faculty: "",
@@ -29,7 +28,7 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
-  const {signup, loading} = useUserStore();
+  const {signup} = useUserStore();
 
   const faculties = [
     "Faculty of Computing",
@@ -45,51 +44,15 @@ const SignUpPage = () => {
     });
   };
 
-  const validateForm = () => {
-  const nameRegex = /^[A-Za-z\s'-]+$/;
-  const emailRegex = /^[^\s@]+@my\.sliit\.lk$/;
-  const studentIdRegex = /^[A-Z]{2}\d{8}$/;
-  const phoneRegex = /^0\d{9}$/;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    signup(formData.username, formData.email, formData.studentId, formData.faculty, formData.phone, formData.password, formData.confirmPassword);
 
-  if (!nameRegex.test(formData.name)) {
-    return "Name can only contain letters, spaces, hyphens, and apostrophes.";
-  }
-
-  if (!emailRegex.test(formData.email)) {
-    return "Please enter a valid email address.";
-  }
-
-  if (!studentIdRegex.test(formData.studentId)) {
-    return "Please enter a valid student ID (e.g. IT12345678)";
-  }
-
-  if (!phoneRegex.test(formData.phone)) {
-    return "Phone number must be 10 digits and start with 0.";
-  }
-
-  if (formData.password.length < 6) {
-    return "Password must be at least 6 characters.";
-  }
-
-  if (formData.password !== formData.confirmPassword) {
-    return "Passwords do not match.";
-  }
-
-  return null;
-};
-
-const handleSubmit = (e) => {
-  e.preventDefault();
-
-  const error = validateForm();
-
-  if (error) {
-    toast.error(error);
-    return;
-  }
-
-  signup(formData);
-};
+    setTimeout(() => {
+      console.log(formData);
+      setLoading(false);
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4 py-10">
@@ -114,14 +77,14 @@ const handleSubmit = (e) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Name */}
+          {/* Username */}
           <div className="relative">
             <User className="absolute left-3 top-3.5 text-gray-400 w-5 h-5" />
             <input
               type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
+              name="username"
+              placeholder="Username"
+              value={formData.username}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
               required
@@ -134,7 +97,7 @@ const handleSubmit = (e) => {
             <input
               type="email"
               name="email"
-              placeholder="Student Email (example@my.sliit.lk)"
+              placeholder="Student Email"
               value={formData.email}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
@@ -148,7 +111,7 @@ const handleSubmit = (e) => {
             <input
               type="text"
               name="studentId"
-              placeholder="Student ID "
+              placeholder="Student ID"
               value={formData.studentId}
               onChange={handleChange}
               className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
