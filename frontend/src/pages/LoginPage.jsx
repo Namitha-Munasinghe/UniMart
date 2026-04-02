@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Lock, LogIn, ArrowRight, Loader } from "lucide-react";
 import { motion } from "framer-motion";
+import { useUserStore } from "../stores/useUserStore.js"; 
 
 const LoginPage = () => {
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const {login, loading} = useUserStore();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -19,19 +21,17 @@ const LoginPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = (e) => {
+  e.preventDefault();
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log(formData);
-      setLoading(false);
-    }, 2000);
-  };
+  const { email, password } = formData;
+
+  login(email, password);
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4">
+      
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
