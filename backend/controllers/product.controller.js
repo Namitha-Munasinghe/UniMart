@@ -371,9 +371,7 @@ export const updateProduct = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
   try {
-    // `DELETE` calls from the frontend don't send a JSON body,
-    // so `req.body` can be undefined.
-    const sellerId = req.body?.sellerId ?? req.query.sellerId;
+    const sellerId = req.body.sellerId ?? req.query.sellerId;
     if (!sellerId) {
       return res.status(400).json({
         message: "sellerId is required (body or query) to verify ownership",
