@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
+
+// Some ISP/router DNS resolvers reject SRV lookups used by mongodb+srv URIs.
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 export const connectDB = async () => {
   try {
