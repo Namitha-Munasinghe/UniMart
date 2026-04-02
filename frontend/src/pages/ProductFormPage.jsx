@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import {
   fetchCategories,
   fetchProduct,
-  createProduct,
-  updateProduct,
+  createProductWithImage,
+  updateProductWithImage,
+  fetchPriceSuggestion,
   getSellerId,
 } from "../lib/productApi";
 import { validateProductForm } from "../lib/formValidation";
@@ -40,11 +41,29 @@ const ProductFormPage = () => {
     status: "Available",
   });
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [suggestingPrice, setSuggestingPrice] = useState(false);
+  const [priceSuggestion, setPriceSuggestion] = useState(null);
+
   const runValidation = useCallback(() => {
-    const next = validateProductForm(form, { isEdit });
+    const next = validateProductForm({ ...form, imageFile }, { isEdit });
     setErrors(next);
     return next;
-  }, [form, isEdit]);
+  }, [form, imageFile, isEdit]);
+
+  useEffect(() => {
+    if (!imageFile) return;
+    const url = URL.createObjectURL(imageFile);
+    setImagePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  useEffect(() => {
+    if (imageFile) return;
+    // In edit mode, keep the currently stored image preview.
+    setImagePreview(form.image || "");
+  }, [imageFile, form.image]);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,6 +98,8 @@ const ProductFormPage = () => {
             category: p.category || "",
             status: p.status || "Available",
           });
+          setImageFile(null);
+          setImagePreview(p.image || "");
         }
       } catch (e) {
         toast.error(e.message);
@@ -105,8 +126,43 @@ const ProductFormPage = () => {
   const onBlur = (e) => {
     const { name } = e.target;
     setTouched((t) => ({ ...t, [name]: true }));
-    const next = validateProductForm(form, { isEdit });
+    const next = validateProductForm({ ...form, imageFile }, { isEdit });
     if (next[name]) setErrors((prev) => ({ ...prev, [name]: next[name] }));
+  };
+
+  const onImageFileChange = (e) => {
+    const file = e.target.files?.[0] ?? null;
+    setImageFile(file);
+    setTouched((t) => ({ ...t, image: true }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.image;
+      return next;
+    });
+  };
+
+  const onSuggestPrice = async () => {
+    if (!form.category) {
+      toast.error("Select a category first to get price help.");
+      return;
+    }
+
+    setSuggestingPrice(true);
+    try {
+      const data = await fetchPriceSuggestion({
+        name: form.name,
+        description: form.description,
+        category: form.category,
+      });
+      setPriceSuggestion(data.suggestion || null);
+      if (data.suggestion?.target && !form.price) {
+        setForm((f) => ({ ...f, price: String(data.suggestion.target) }));
+      }
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setSuggestingPrice(false);
+    }
   };
 
   const onSubmit = async (e) => {
@@ -125,24 +181,31 @@ const ProductFormPage = () => {
       return;
     }
 
-    const price = Number(form.price);
-    const body = {
-      name: form.name.trim(),
-      description: form.description.trim(),
-      price,
-      image: form.image.trim(),
-      category: form.category,
-      sellerId,
-      status: form.status,
-    };
-
     setSubmitting(true);
     try {
       if (isEdit) {
-        await updateProduct(id, body);
+        const fd = new FormData();
+        fd.append("name", form.name.trim());
+        fd.append("description", form.description.trim());
+        fd.append("price", String(Number(form.price)));
+        fd.append("category", form.category);
+        fd.append("sellerId", sellerId);
+        fd.append("status", form.status);
+        if (imageFile) fd.append("image", imageFile);
+
+        await updateProductWithImage(id, fd);
         toast.success("Product updated.");
       } else {
-        await createProduct(body);
+        const fd = new FormData();
+        fd.append("name", form.name.trim());
+        fd.append("description", form.description.trim());
+        fd.append("price", String(Number(form.price)));
+        fd.append("category", form.category);
+        fd.append("sellerId", sellerId);
+        fd.append("status", form.status);
+        if (imageFile) fd.append("image", imageFile);
+
+        await createProductWithImage(fd);
         toast.success("Product published.");
       }
       navigate("/my-products");
@@ -281,28 +344,79 @@ const ProductFormPage = () => {
             )}
           </div>
 
+          {!isEdit && (
+            <div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onSuggestPrice}
+                  disabled={suggestingPrice}
+                  className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {suggestingPrice ? "Checking..." : "Suggest price"}
+                </button>
+                {priceSuggestion && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (priceSuggestion?.target) {
+                        setForm((f) => ({
+                          ...f,
+                          price: String(priceSuggestion.target),
+                        }));
+                      }
+                    }}
+                    className="rounded-lg border border-violet-300 px-3.5 py-2 text-xs font-semibold text-violet-900 hover:bg-violet-100"
+                  >
+                    Use target
+                  </button>
+                )}
+              </div>
+
+              {priceSuggestion && (
+                <div className="mt-3 rounded-xl border border-violet-200 bg-violet-50/70 p-4">
+                  <p className="text-sm font-semibold text-violet-900">
+                    Suggested range: LKR{" "}
+                    {Number(priceSuggestion.min).toLocaleString()} -{" "}
+                    {Number(priceSuggestion.max).toLocaleString()}
+                  </p>
+                  <p className="mt-1 text-xs text-violet-700">
+                    Fair target: LKR {Number(priceSuggestion.target).toLocaleString()} |{" "}
+                    Confidence: {priceSuggestion.confidence} | Sample:{" "}
+                    {priceSuggestion.sampleSize}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label
               htmlFor="product-image"
               className="block text-sm font-medium text-slate-700"
             >
-              Image URL <span className="text-red-600">*</span>
+              Product image <span className="text-red-600">*</span>
             </label>
             <input
               id="product-image"
               name="image"
-              type="url"
-              inputMode="url"
-              placeholder="https://example.com/photo.jpg"
-              value={form.image}
-              onChange={onChange}
-              onBlur={onBlur}
+              type="file"
+              accept="image/*"
+              onChange={onImageFileChange}
               aria-invalid={Boolean(err("image"))}
               aria-describedby={err("image") ? "err-image" : undefined}
               className={fieldClass(err("image"))}
             />
-            <p className="mt-1 text-xs text-slate-500">
-              Use a direct link to an image (https).
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="Product preview"
+                className="mt-3 h-24 w-24 rounded-lg border border-brand-200 object-cover"
+              />
+            )}
+            <p className="mt-2 text-xs text-slate-500">
+              Upload an image from your computer.
             </p>
             {err("image") && (
               <p id="err-image" className="mt-1.5 text-sm text-red-600" role="alert">

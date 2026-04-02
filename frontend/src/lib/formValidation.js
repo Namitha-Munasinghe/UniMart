@@ -43,9 +43,13 @@ export function validateProductForm(values, { isEdit = false } = {}) {
     errors.price = "Price is too large.";
   }
 
-  if (!image) errors.image = "Enter an image URL.";
-  else if (!isValidHttpUrl(image))
-    errors.image = "Enter a valid URL starting with http:// or https://.";
+  // Product images are uploaded from local files (multipart).
+  // For edits, we keep an existing stored image path in `values.image`.
+  const imageFile = values.imageFile ?? null;
+  const hasImage = Boolean(imageFile) || Boolean(image);
+  if (!hasImage) {
+    errors.image = isEdit ? "Upload a new image (or keep the existing one)." : "Upload an image.";
+  }
 
   if (!category) errors.category = "Select a category.";
 

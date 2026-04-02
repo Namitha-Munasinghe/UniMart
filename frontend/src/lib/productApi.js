@@ -51,6 +51,15 @@ export async function createProduct(body) {
   return handle(res);
 }
 
+// Create product with an uploaded image file (multipart/form-data)
+export async function createProductWithImage(formData) {
+  const res = await fetch(`${BASE}/`, {
+    method: "POST",
+    body: formData,
+  });
+  return handle(res);
+}
+
 export async function updateProduct(id, body) {
   const res = await fetch(`${BASE}/${id}`, {
     method: "PUT",
@@ -60,10 +69,28 @@ export async function updateProduct(id, body) {
   return handle(res);
 }
 
+// Update product with optional image file (multipart/form-data)
+export async function updateProductWithImage(id, formData) {
+  const res = await fetch(`${BASE}/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  return handle(res);
+}
+
 export async function deleteProduct(id, sellerId) {
   const res = await fetch(
     `${BASE}/${id}?sellerId=${encodeURIComponent(sellerId)}`,
     { method: "DELETE" }
   );
+  return handle(res);
+}
+
+export async function fetchPriceSuggestion(body) {
+  const res = await fetch(`${BASE}/suggest-price`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
   return handle(res);
 }
