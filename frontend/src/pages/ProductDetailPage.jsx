@@ -39,15 +39,15 @@ const ProductDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
+      <div className="min-h-screen bg-transparent px-4 py-10">
         <div className="mx-auto max-w-6xl animate-pulse rounded-[2rem] bg-white p-6 shadow-xl">
           <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="h-[420px] rounded-[1.75rem] bg-indigo-100" />
+            <div className="h-[420px] rounded-[1.75rem] bg-[#BDE8F5]" />
             <div className="space-y-4">
-              <div className="h-6 rounded bg-indigo-100" />
+              <div className="h-6 rounded bg-[#BDE8F5]" />
               <div className="h-4 rounded bg-slate-100" />
               <div className="h-24 rounded bg-slate-100" />
-              <div className="h-40 rounded bg-indigo-50" />
+              <div className="h-40 rounded bg-[#BDE8F5]/45" />
             </div>
           </div>
         </div>
@@ -57,14 +57,14 @@ const ProductDetailPage = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
+      <div className="min-h-screen bg-transparent px-4 py-10">
         <div className="mx-auto max-w-3xl rounded-[2rem] bg-white p-10 text-center shadow-lg">
-          <Package className="mx-auto h-10 w-10 text-indigo-400" />
+          <Package className="mx-auto h-10 w-10 text-[#4988C4]" />
           <h1 className="mt-4 text-2xl font-bold text-gray-800">Product not found</h1>
           <p className="mt-2 text-sm text-gray-500">This listing may no longer be available.</p>
           <Link
             to="/"
-            className="mt-6 inline-flex rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+            className="mt-6 inline-flex rounded-2xl bg-[#1C4D8D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0F2854]"
           >
             Back to Home
           </Link>
@@ -74,17 +74,17 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
+    <div className="min-h-screen bg-transparent px-4 py-10">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="rounded-[2rem] bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 p-8 text-white shadow-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-100">Product Details</p>
+        <div className="rounded-[2rem] bg-gradient-to-r from-[#0F2854] via-[#1C4D8D] to-[#4988C4] p-8 text-white shadow-2xl shadow-[#1C4D8D]/20">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#BDE8F5]">Product Details</p>
           <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <h1 className="text-4xl font-bold">{product.name}</h1>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-indigo-50">{product.description}</p>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[#e5f7fc]">{product.description}</p>
             </div>
             <div className="rounded-3xl bg-white/10 px-5 py-4 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.18em] text-indigo-100">Price</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-[#BDE8F5]">Price</p>
               <p className="mt-2 text-3xl font-bold">LKR {product.price}</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ const ProductDetailPage = () => {
                     onClick={() => setActiveImage(image)}
                     className={`overflow-hidden rounded-2xl border-2 transition ${
                       activeImage === image || (!activeImage && index === 0)
-                        ? "border-indigo-500"
+                        ? "border-[#1C4D8D]"
                         : "border-transparent"
                     }`}
                   >
@@ -122,25 +122,25 @@ const ProductDetailPage = () => {
             <div className="rounded-[2rem] bg-white p-6 shadow-xl">
               <h2 className="text-2xl font-bold text-gray-800">Listing overview</h2>
               <div className="mt-5 space-y-4">
-                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
+                <div className="flex items-center justify-between rounded-2xl bg-[#BDE8F5]/35 px-4 py-4">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Tag size={18} className="text-indigo-600" />
+                    <Tag size={18} className="text-[#1C4D8D]" />
                     <span className="font-medium">Category</span>
                   </div>
-                  <span className="font-semibold capitalize text-indigo-700">{product.category}</span>
+                  <span className="font-semibold capitalize text-[#1C4D8D]">{product.category}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
+                <div className="flex items-center justify-between rounded-2xl bg-[#BDE8F5]/35 px-4 py-4">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Package size={18} className="text-indigo-600" />
+                    <Package size={18} className="text-[#1C4D8D]" />
                     <span className="font-medium">Status</span>
                   </div>
                   <span className="font-semibold text-emerald-700">{product.status}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
+                <div className="flex items-center justify-between rounded-2xl bg-[#BDE8F5]/35 px-4 py-4">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <CalendarDays size={18} className="text-indigo-600" />
+                    <CalendarDays size={18} className="text-[#1C4D8D]" />
                     <span className="font-medium">Listed on</span>
                   </div>
                   <span className="font-semibold text-gray-700">
@@ -148,9 +148,9 @@ const ProductDetailPage = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
+                <div className="flex items-center justify-between rounded-2xl bg-[#BDE8F5]/35 px-4 py-4">
                   <div className="flex items-center gap-3 text-gray-700">
-                    <Clock3 size={18} className="text-indigo-600" />
+                    <Clock3 size={18} className="text-[#1C4D8D]" />
                     <span className="font-medium">Expires on</span>
                   </div>
                   <span className="font-semibold text-gray-700">
@@ -171,26 +171,26 @@ const ProductDetailPage = () => {
                 <button
                   type="button"
                   disabled
-                  className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white opacity-80"
+                  className="rounded-2xl bg-[#1C4D8D] px-5 py-3 text-sm font-semibold text-white opacity-80"
                 >
                   Contact Seller
                 </button>
                 <button
                   type="button"
                   disabled
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white opacity-80"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0F2854] px-5 py-3 text-sm font-semibold text-white opacity-80"
                 >
                   <MessageSquareMore size={18} />
                   Schedule Meeting
                 </button>
               </div>
 
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-indigo-500">Coming soon</p>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-[#4988C4]">Coming soon</p>
             </div>
 
             <Link
               to="/"
-              className="inline-flex rounded-2xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50"
+              className="inline-flex rounded-2xl border border-[#4988C4]/25 bg-white px-5 py-3 text-sm font-semibold text-[#1C4D8D] shadow-sm transition hover:bg-[#BDE8F5]/35"
             >
               Back to latest products
             </Link>

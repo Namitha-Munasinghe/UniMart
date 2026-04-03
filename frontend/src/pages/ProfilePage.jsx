@@ -35,17 +35,17 @@ const ProfilePage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-6">
+    <div className="min-h-screen bg-transparent p-6">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8"
+        className="um-glass mx-auto max-w-5xl rounded-[28px] p-8"
       >
         {/* Header Section */}
         <div className="flex items-center justify-between border-b pb-6">
           <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#1C4D8D] text-3xl font-bold text-white">
               {user.name.charAt(0).toUpperCase()}
             </div>
 
@@ -69,7 +69,7 @@ const ProfilePage = () => {
                 Member since {joinedDate}
               </p>
 
-              <span className="inline-block mt-3 px-3 py-1 text-sm bg-indigo-100 text-indigo-600 rounded-full">
+              <span className="mt-3 inline-block rounded-full bg-[#BDE8F5] px-3 py-1 text-sm text-[#1C4D8D]">
                 {user.studentId}
               </span>
             </div>
@@ -78,7 +78,7 @@ const ProfilePage = () => {
           {/* Edit Button */}
           <Link to="/edit-profile">
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition"
+              className="um-primary-btn px-4 py-2"
             >
               <Edit size={18} />
               Edit Profile
@@ -90,7 +90,7 @@ const ProfilePage = () => {
         <div className="grid md:grid-cols-3 gap-6 mt-8">
           
           {/* Rating Card */}
-          <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 p-6 rounded-xl shadow-sm">
+          <div className="rounded-xl bg-[#BDE8F5]/55 p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-2">
               <Star className="text-yellow-500" />
               <h3 className="font-semibold text-gray-700">Rating</h3>
@@ -105,7 +105,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Role Card */}
-          <div className="bg-gradient-to-r from-indigo-100 to-indigo-50 p-6 rounded-xl shadow-sm">
+          <div className="rounded-xl bg-[#BDE8F5]/45 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-700 mb-2">Role</h3>
             <p className="text-xl font-bold capitalize text-gray-800">
               {user.role}
@@ -113,7 +113,7 @@ const ProfilePage = () => {
           </div>
 
           {/* Account Status Card */}
-          <div className="bg-gradient-to-r from-green-100 to-green-50 p-6 rounded-xl shadow-sm">
+          <div className="rounded-xl bg-white/85 p-6 shadow-sm">
             <h3 className="font-semibold text-gray-700 mb-2">
               Account Status
             </h3>
@@ -134,12 +134,12 @@ const ProfilePage = () => {
 
             <div className="space-y-3 text-gray-600">
               <p className="flex items-center gap-3">
-                <School size={18} className="text-indigo-500" />
+                <School size={18} className="text-[#1C4D8D]" />
                 Faculty: {user.faculty}
               </p>
 
               <p className="flex items-center gap-3">
-                <IdCard size={18} className="text-indigo-500" />
+                <IdCard size={18} className="text-[#1C4D8D]" />
                 Student ID: {user.studentId}
               </p>
             </div>
@@ -153,12 +153,12 @@ const ProfilePage = () => {
 
             <div className="space-y-3 text-gray-600">
               <p className="flex items-center gap-3">
-                <Mail size={18} className="text-indigo-500" />
+                <Mail size={18} className="text-[#1C4D8D]" />
                 {user.email}
               </p>
 
               <p className="flex items-center gap-3">
-                <Phone size={18} className="text-indigo-500" />
+                <Phone size={18} className="text-[#1C4D8D]" />
                 {user.phone}
               </p>
             </div>
@@ -167,7 +167,7 @@ const ProfilePage = () => {
 
         <div className="mt-10 border-t pt-6 flex flex-wrap justify-between gap-3">
           <Link to="/my-products">
-            <button className="flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition">
+            <button className="um-primary-btn px-5 py-2">
               <Package size={18} />
               My Products
             </button>

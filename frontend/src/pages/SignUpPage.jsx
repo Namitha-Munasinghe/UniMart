@@ -92,17 +92,17 @@ const handleSubmit = (e) => {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4 py-10">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md"
+        className="um-glass w-full max-w-md rounded-[28px] p-8"
       >
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
-            <UserPlus className="w-10 h-10 text-indigo-600" />
+            <UserPlus className="h-10 w-10 text-[#1C4D8D]" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">
             Create Account
@@ -123,7 +123,7 @@ const handleSubmit = (e) => {
               placeholder="Name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -137,7 +137,7 @@ const handleSubmit = (e) => {
               placeholder="Student Email (example@my.sliit.lk)"
               value={formData.email}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -151,7 +151,7 @@ const handleSubmit = (e) => {
               placeholder="Student ID "
               value={formData.studentId}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -163,7 +163,7 @@ const handleSubmit = (e) => {
               name="faculty"
               value={formData.faculty}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none bg-white"
+              className="um-input bg-white pl-10"
               required
             >
               <option value="">Select Faculty</option>
@@ -184,7 +184,7 @@ const handleSubmit = (e) => {
               placeholder="Phone Number"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -198,7 +198,7 @@ const handleSubmit = (e) => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -212,7 +212,7 @@ const handleSubmit = (e) => {
               placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -222,7 +222,7 @@ const handleSubmit = (e) => {
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-700 transition"
+            className="um-primary-btn w-full"
           >
             {loading ? (
               <Loader className="animate-spin w-5 h-5" />
@@ -239,7 +239,7 @@ const handleSubmit = (e) => {
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-indigo-600 font-medium hover:underline"
+            className="font-medium text-[#1C4D8D] hover:underline"
           >
             Sign In
           </Link>

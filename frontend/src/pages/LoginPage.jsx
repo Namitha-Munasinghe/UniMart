@@ -30,18 +30,18 @@ const LoginPage = () => {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent px-4">
       
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md"
+        className="um-glass w-full max-w-md rounded-[28px] p-8"
       >
         {/* Header */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
-            <LogIn className="w-10 h-10 text-indigo-600" />
+            <LogIn className="h-10 w-10 text-[#1C4D8D]" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800">
             Welcome Back
@@ -63,7 +63,7 @@ const LoginPage = () => {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full pl-10 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10"
               required
             />
           </div>
@@ -77,14 +77,14 @@ const LoginPage = () => {
               placeholder="Password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full pl-10 pr-12 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="um-input pl-10 pr-12"
               required
             />
 
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-sm text-indigo-600 font-medium"
+              className="absolute right-3 top-3 text-sm font-medium text-[#1C4D8D]"
             >
               {showPassword ? "Hide" : "Show"}
             </button>
@@ -95,7 +95,7 @@ const LoginPage = () => {
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-indigo-700 transition"
+            className="um-primary-btn w-full"
           >
             {loading ? (
               <Loader className="animate-spin w-5 h-5" />
@@ -112,7 +112,7 @@ const LoginPage = () => {
           Don’t have an account?{" "}
           <Link
             to="/signup"
-            className="text-indigo-600 font-medium hover:underline"
+            className="font-medium text-[#1C4D8D] hover:underline"
           >
             Sign Up
           </Link>

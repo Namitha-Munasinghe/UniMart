@@ -186,14 +186,14 @@ const MyProductsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-8">
+    <div className="min-h-screen bg-transparent px-4 py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 p-8 text-white shadow-xl">
+        <div className="rounded-3xl bg-gradient-to-r from-[#0F2854] via-[#1C4D8D] to-[#4988C4] p-8 text-white shadow-xl shadow-[#1C4D8D]/20">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-indigo-100">Seller Dashboard</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-[#BDE8F5]">Seller Dashboard</p>
               <h1 className="mt-3 text-4xl font-bold">My Products</h1>
-              <p className="mt-3 max-w-2xl text-sm text-indigo-50/90">
+              <p className="mt-3 max-w-2xl text-sm text-[#e5f7fc]">
                 Manage only the items you created, upload product images, and keep listings fresh for the public marketplace.
               </p>
             </div>
@@ -234,7 +234,7 @@ const MyProductsPage = () => {
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Product name"
-                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
+                className="um-input"
                 required
               />
 
@@ -244,7 +244,7 @@ const MyProductsPage = () => {
                 onChange={handleChange}
                 placeholder="Describe the item or service"
                 rows="5"
-                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
+                className="um-input"
                 required
               />
 
@@ -253,7 +253,7 @@ const MyProductsPage = () => {
                   name="category"
                   value={form.category}
                   onChange={handleChange}
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
+                  className="um-input"
                   required
                 >
                   {PRODUCT_CATEGORIES.map((category) => (
@@ -267,7 +267,7 @@ const MyProductsPage = () => {
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
+                  className="um-input"
                 >
                   {PRODUCT_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -285,7 +285,7 @@ const MyProductsPage = () => {
                   value={form.price}
                   onChange={handleChange}
                   placeholder="Price"
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
+                  className="um-input"
                   required
                 />
 
@@ -293,7 +293,7 @@ const MyProductsPage = () => {
                   type="button"
                   onClick={handleSuggestPrice}
                   disabled={suggestingPrice}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-400 px-5 py-3 font-semibold text-slate-900 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#BDE8F5] px-5 py-3 font-semibold text-[#0F2854] transition hover:bg-[#a5dceb] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <Sparkles size={18} />
                   {suggestingPrice ? "Thinking..." : "Suggest Price"}
@@ -306,23 +306,19 @@ const MyProductsPage = () => {
                 accept="image/*"
                 multiple
                 onChange={handleChange}
-                className="rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-sm text-slate-600"
+                className="rounded-2xl border border-dashed border-[#4988C4]/30 px-4 py-3 text-sm text-slate-600"
               />
 
               {suggestion && (
-                <div className="rounded-2xl bg-amber-50 p-4 text-sm text-slate-700">
+                <div className="rounded-2xl bg-[#BDE8F5]/45 p-4 text-sm text-slate-700">
                   Suggested price: <span className="font-semibold">LKR {suggestion.suggestedPrice}</span>.{" "}
                   {suggestion.reasoning}
                 </div>
               )}
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  <Plus size={18} />
-                  {saving ? "Saving..." : editingProductId ? "Update Product" : "Create Product"}
+              <button type="submit" disabled={saving} className="um-primary-btn disabled:cursor-not-allowed disabled:opacity-70">
+                <Plus size={18} />
+                {saving ? "Saving..." : editingProductId ? "Update Product" : "Create Product"}
               </button>
             </div>
           </form>
@@ -335,7 +331,7 @@ const MyProductsPage = () => {
                   Only products created by this seller are shown here.
                 </p>
               </div>
-              <span className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">
+              <span className="rounded-full bg-[#BDE8F5] px-4 py-2 text-sm font-semibold text-[#1C4D8D]">
                 {products.length} products
               </span>
             </div>
@@ -344,7 +340,7 @@ const MyProductsPage = () => {
               {loading ? (
                 <p className="text-sm text-slate-500">Loading your products...</p>
               ) : products.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-indigo-200 p-6 text-sm text-slate-500">
+                <div className="rounded-2xl border border-dashed border-[#4988C4]/25 p-6 text-sm text-slate-500">
                   No products yet. Create your first listing from the form.
                 </div>
               ) : (
@@ -354,7 +350,7 @@ const MyProductsPage = () => {
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-semibold text-slate-900">{product.name}</h3>
-                          <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
+                          <span className="rounded-full bg-[#BDE8F5] px-3 py-1 text-xs font-medium text-[#1C4D8D]">
                             {product.category}
                           </span>
                           <span
@@ -370,13 +366,13 @@ const MyProductsPage = () => {
                           </span>
                         </div>
                         <p className="mt-2 text-sm text-slate-600">{product.description}</p>
-                        <p className="mt-3 text-base font-semibold text-indigo-700">LKR {product.price}</p>
+                        <p className="mt-3 text-base font-semibold text-[#1C4D8D]">LKR {product.price}</p>
                         <p className="mt-2 text-xs text-slate-400">
                           Expires on {new Date(product.expiresAt).toLocaleDateString()}
                         </p>
                         <Link
                           to={`/products/${product._id}`}
-                          className="mt-3 inline-flex text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                          className="mt-3 inline-flex text-sm font-semibold text-[#1C4D8D] transition hover:text-[#0F2854]"
                         >
                           View detail page
                         </Link>
