@@ -186,14 +186,14 @@ const MyProductsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="rounded-3xl bg-gradient-to-r from-sky-950 via-cyan-900 to-emerald-800 p-8 text-white shadow-xl">
+        <div className="rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 p-8 text-white shadow-xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-cyan-200">Seller Dashboard</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-indigo-100">Seller Dashboard</p>
               <h1 className="mt-3 text-4xl font-bold">My Products</h1>
-              <p className="mt-3 max-w-2xl text-sm text-cyan-50/90">
+              <p className="mt-3 max-w-2xl text-sm text-indigo-50/90">
                 Manage only the items you created, upload product images, and keep listings fresh for the public marketplace.
               </p>
             </div>
@@ -234,7 +234,7 @@ const MyProductsPage = () => {
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Product name"
-                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-500"
+                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
                 required
               />
 
@@ -244,7 +244,7 @@ const MyProductsPage = () => {
                 onChange={handleChange}
                 placeholder="Describe the item or service"
                 rows="5"
-                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-500"
+                className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
                 required
               />
 
@@ -253,7 +253,7 @@ const MyProductsPage = () => {
                   name="category"
                   value={form.category}
                   onChange={handleChange}
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-500"
+                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
                   required
                 >
                   {PRODUCT_CATEGORIES.map((category) => (
@@ -267,7 +267,7 @@ const MyProductsPage = () => {
                   name="status"
                   value={form.status}
                   onChange={handleChange}
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-500"
+                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
                 >
                   {PRODUCT_STATUSES.map((status) => (
                     <option key={status} value={status}>
@@ -285,7 +285,7 @@ const MyProductsPage = () => {
                   value={form.price}
                   onChange={handleChange}
                   placeholder="Price"
-                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-cyan-500"
+                  className="rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-indigo-500"
                   required
                 />
 
@@ -316,13 +316,13 @@ const MyProductsPage = () => {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <Plus size={18} />
-                {saving ? "Saving..." : editingProductId ? "Update Product" : "Create Product"}
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  <Plus size={18} />
+                  {saving ? "Saving..." : editingProductId ? "Update Product" : "Create Product"}
               </button>
             </div>
           </form>
@@ -335,7 +335,7 @@ const MyProductsPage = () => {
                   Only products created by this seller are shown here.
                 </p>
               </div>
-              <span className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-semibold text-cyan-900">
+              <span className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700">
                 {products.length} products
               </span>
             </div>
@@ -344,7 +344,7 @@ const MyProductsPage = () => {
               {loading ? (
                 <p className="text-sm text-slate-500">Loading your products...</p>
               ) : products.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500">
+                <div className="rounded-2xl border border-dashed border-indigo-200 p-6 text-sm text-slate-500">
                   No products yet. Create your first listing from the form.
                 </div>
               ) : (
@@ -354,7 +354,7 @@ const MyProductsPage = () => {
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-semibold text-slate-900">{product.name}</h3>
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                          <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-medium text-indigo-700">
                             {product.category}
                           </span>
                           <span
@@ -370,10 +370,16 @@ const MyProductsPage = () => {
                           </span>
                         </div>
                         <p className="mt-2 text-sm text-slate-600">{product.description}</p>
-                        <p className="mt-3 text-base font-semibold text-slate-900">LKR {product.price}</p>
+                        <p className="mt-3 text-base font-semibold text-indigo-700">LKR {product.price}</p>
                         <p className="mt-2 text-xs text-slate-400">
                           Expires on {new Date(product.expiresAt).toLocaleDateString()}
                         </p>
+                        <Link
+                          to={`/products/${product._id}`}
+                          className="mt-3 inline-flex text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                        >
+                          View detail page
+                        </Link>
                       </div>
 
                       <div className="flex gap-2">
