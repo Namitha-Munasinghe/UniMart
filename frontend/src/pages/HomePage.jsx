@@ -35,11 +35,10 @@ const HomePage = () => {
                 Latest Listings
               </p>
               <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
-                Discover the newest products posted by UniMart sellers.
+                Your campus, your marketplace!
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-indigo-50 sm:text-base">
-                Browse fresh marketplace listings in a clean buyer view. Open any card to see the full product details,
-                expiry date, and the upcoming meeting option.
+                Buy what you need or sell what you don’t. Meet up between lectures to complete your trade instantly.
               </p>
             </div>
 
@@ -47,12 +46,12 @@ const HomePage = () => {
               <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-indigo-100">Visible Now</p>
                 <p className="mt-3 text-3xl font-bold">{products.length}</p>
-                <p className="mt-2 text-sm text-indigo-100/90">Latest available listings shown for buyers</p>
+                <p className="mt-2 text-sm text-indigo-100/90">New items nearby</p>
               </div>
               <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.2em] text-indigo-100">Buyer Ready</p>
-                <p className="mt-3 text-lg font-semibold">Cards are clickable</p>
-                <p className="mt-2 text-sm text-indigo-100/90">Open each product to view its complete detail page</p>
+                <p className="mt-3 text-lg font-semibold">Secure Trading</p>
+                <p className="mt-2 text-sm text-indigo-100/90">View full details before you buy</p>
               </div>
             </div>
           </div>
