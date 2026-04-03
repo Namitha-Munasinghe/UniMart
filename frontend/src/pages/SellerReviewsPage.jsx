@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Star, MessageCircle, Filter, Sparkles, ShieldCheck, X, Maximize2 } from "lucide-react";
 
-const SellerReviewsPage = () => {
-  const { sellerId } = useParams();
+const SellerReviewsPage = ({ sellerId: sellerIdProp }) => {
+  const { sellerId: sellerIdFromParams } = useParams();
+  const sellerId = sellerIdProp || sellerIdFromParams;
+  console.log("Seller ID in Reviews Page:", sellerId);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalReviews, setTotalReviews] = useState(0);
@@ -20,7 +22,9 @@ const SellerReviewsPage = () => {
       fetchReviews();
       fetchTrustScore();
       fetchAISummary();
+      return;
     }
+    setLoading(false);
   }, [sellerId]);
 
   const fetchReviews = async () => {

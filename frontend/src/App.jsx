@@ -55,7 +55,7 @@ function App() {
             element={user ? <MyProductsPage /> : <Navigate to="/login" />}
           />
           <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/submit-review" element={<SubmitReviewPage />} />
+          <Route path="/submit-review/:productId/:sellerId" element={<SubmitReviewPage />} />
           <Route path="/seller-reviews" element={<SellerReviewsPage />} />
           <Route path="/admin-reviews" element={<AdminReviewsPage />} />
           <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />

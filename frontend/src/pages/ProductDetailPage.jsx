@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { CalendarDays, Clock3, MessageSquareMore, Package, Tag } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { CalendarDays, Clock3, MessageSquareMore, Package, Sparkles, Star, Tag } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
@@ -9,6 +9,7 @@ const DUMMY_SELLER_ID = "000000000000000000000001";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useUserStore();
   const sellerId = useMemo(() => user?._id || user?.id || DUMMY_SELLER_ID, [user]);
 
@@ -72,6 +73,17 @@ const ProductDetailPage = () => {
       </div>
     );
   }
+
+  const sellerReviewTargetId =
+    typeof product.sellerId === "object" ? product.sellerId?._id : product.sellerId;
+
+  const handleWriteReview = () => {
+    if (!product?._id || !sellerReviewTargetId) {
+      toast.error("Unable to open review form for this product.");
+      return;
+    }
+    navigate(`/submit-review/${product._id}/${sellerReviewTargetId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
@@ -182,6 +194,24 @@ const ProductDetailPage = () => {
                 >
                   <MessageSquareMore size={18} />
                   Schedule Meeting
+                </button>
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-purple-50 p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-indigo-700">Enjoyed this product?</p>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-2.5 py-1 text-[11px] font-semibold text-indigo-700">
+                    <Sparkles size={12} />
+                    Recommended
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleWriteReview}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-md ring-2 ring-indigo-100 transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg"
+                >
+                  <Star size={16} className="fill-white" />
+                  Write a Review
                 </button>
               </div>
 

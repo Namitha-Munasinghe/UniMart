@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Star, Upload, Send, ShieldCheck, X, Sparkles, MessageSquareHeart } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useUserStore } from "../stores/useUserStore";
 
 const SubmitReviewPage = () => {
+  const { productId, sellerId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useUserStore();
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
@@ -39,6 +44,8 @@ const SubmitReviewPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!productId || !sellerId) return toast.error("Missing product or seller information.");
+    if (!user?._id && !user?.id) return toast.error("Please login to submit a review.");
     if (rating === 0) return toast.error("Please select a rating!");
     if (!comment.trim()) return toast.error("Please write a comment!");
 
@@ -47,8 +54,9 @@ const SubmitReviewPage = () => {
 
     try {
       const formData = new FormData();
-      formData.append("buyerId", "507f1f77bcf86cd799439011");
-      formData.append("sellerId", "507f1f77bcf86cd799439012");
+      formData.append("buyerId", user?._id || user?.id);
+      formData.append("sellerId", sellerId);
+      formData.append("productId", productId);
       formData.append("rating", rating);
       formData.append("comment", comment);
       images.forEach(img => formData.append("proofImages", img));
@@ -113,6 +121,11 @@ const SubmitReviewPage = () => {
       setPreviews([]);
       setUploadProgress(0);
       setUploadStage("");
+      if (window.history.length > 1) {
+        navigate(-1);
+      } else {
+        navigate(`/products/${productId}`);
+      }
 
     } catch (error) {
       toast.error(error.message || "Something went wrong!");
