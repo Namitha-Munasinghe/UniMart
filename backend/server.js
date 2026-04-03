@@ -6,9 +6,7 @@ import authRoutes from "./routes/auth.route.js";
 import { connectDB } from "./lib/db.js";
 import reviewRoutes from "./routes/review.route.js";
 import productRoutes from "./routes/product.route.js";
-import dns from "dns";
 
-dns.setServers(["1.1.1.1", "8.8.8.8"]);
 dotenv.config();
 
 const app = express();
