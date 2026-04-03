@@ -12,15 +12,19 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Storage Settings
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'UniMart_Reviews', 
-        allowed_formats: ['jpg', 'png', 'jpeg'],
-    },
-});
+const createCloudinaryUpload = (folder = 'UniMart_Reviews') => {
+    const storage = new CloudinaryStorage({
+        cloudinary,
+        params: {
+            folder,
+            allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+        },
+    });
 
-const upload = multer({ storage: storage });
+    return multer({ storage });
+};
 
+const upload = createCloudinaryUpload();
+
+export { createCloudinaryUpload };
 export default upload;

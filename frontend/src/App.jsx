@@ -14,6 +14,7 @@ import SellerReviewsPage from "./pages/SellerReviewsPage";
 import AdminReviewsPage from "./pages/AdminReviewsPage";
 import BuyerScheduleMeetingPage from "./pages/BuyerScheduleMeetingPage";
 import SellerScheduleMeetingPage from "./pages/SellerScheduleMeetingPage";
+import MyProductsPage from "./pages/MyProductsPage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -47,6 +48,10 @@ function App() {
           <Route
             path="/edit-profile"
             element={user ? <EditProfilePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/my-products"
+            element={user ? <MyProductsPage /> : <Navigate to="/login" />}
           />
           <Route path="/submit-review" element={<SubmitReviewPage />} />
           <Route path="/seller-reviews" element={<SellerReviewsPage />} />

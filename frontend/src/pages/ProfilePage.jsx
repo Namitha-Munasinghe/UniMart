@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Edit,
   Trash2,
+  Package,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
@@ -164,23 +165,31 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Account Actions */}
-        <div className="mt-10 border-t pt-6 flex justify-end gap-3">
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
-          >
-            <Trash2 size={18} />
-            Delete Account
-          </button>
+        <div className="mt-10 border-t pt-6 flex flex-wrap justify-between gap-3">
+          <Link to="/my-products">
+            <button className="flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition">
+              <Package size={18} />
+              My Products
+            </button>
+          </Link>
 
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
+          <div className="flex flex-wrap justify-end gap-3">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
+            >
+              <Trash2 size={18} />
+              Delete Account
+            </button>
+
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
+            >
+              <LogOut size={18} />
+              Logout
+            </button>
+          </div>
         </div>
       </motion.div>
 
