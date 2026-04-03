@@ -1,88 +1,10 @@
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  CalendarRange,
-  
-  Send,
-  
-} from "lucide-react";
-
-const sellerStats = [
-  { label: "Pending Requests", value: "5", valueClassName: "text-indigo-600" },
-  { label: "Accepted Requests", value: "8", valueClassName: "text-emerald-600" },
-  { label: "Ignored Requests", value: "2", valueClassName: "text-slate-500" },
-];
+import { CalendarRange, Clock3, MapPin, Phone, Send } from "lucide-react";
+import { toast } from "react-hot-toast";
+import axios from "../lib/axios";
 
 const sellerTabs = ["Requests", "Chat", "History"];
-
-const incomingRequests = [
-  {
-    initials: "A",
-    avatarTone: "blue",
-    name: "Kamal Perera",
-    badge: { label: "New", tone: "amber" },
-    lines: [
-      ["iphone 13pro", "Mar 25, 10:00 AM"],
-      ["30 min", "New Building"],
-    ],
-    
-    noteTone: "muted",
-    actions: ["Accept", "Ignore","Message"],
-  },
-  {
-    initials: "R",
-    avatarTone: "violet",
-    name: "Rashida M.",
-    lines: [
-      ["Engineering Textbooks", "Mar 26, 2:00 PM"],
-      ["15 min", "SLIIT Canteen"],
-    ],
-    actions: ["Accept", "Ignore","Message"],
-  },
-  {
-    initials: "D",
-    avatarTone: "amber",
-    name: "Dilshan K.",
-    badge: { label: "Reschedule", tone: "blue" },
-    lines: [
-      ["Dell Laptop Stand", "Mar 28, 3:30 PM"],
-      ["20 min", "Main Building"],
-    ],
-    
-    
-    actions: ["Accept", "Ignore","Message"],
-  },
-];
-
-const sellerResponses = [
-  {
-    title: "Accepted Request",
-    buyer: "Tharuka W.",
-    details: "Scientific Calculator - Mar 24, 2:00 PM - Main Building",
-    tone: "green",
-    status: "Accepted",
-  },
-  {
-    title: "Waiting for Seller Action",
-    buyer: "Amara Silva",
-    details: "Samsung A54 - Mar 25, 10:00 AM - New Building",
-    tone: "amber",
-    status: "Pending",
-  },
-  {
-    title: "Ignored Request",
-    buyer: "Rashida M.",
-    details: "Engineering Textbooks - Mar 26, 2:00 PM - SLIIT Canteen",
-    tone: "violet",
-    status: "Ignored",
-  },
-];
-
-const sellerMessages = [
-  { side: "recv", initials: "K", tone: "blue", text: "Is there any flexibility in the price ", time: "9:50 AM" },
-  { side: "sent", text: "Im firm on the price since i just posted it", time: "9:53 AM" },
-  
-];
 
 const sectionCardClass =
   "rounded-[24px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)]";
@@ -104,7 +26,45 @@ const responseToneClassNames = {
   amber: "border-amber-400 bg-amber-50 text-amber-700",
   green: "border-emerald-400 bg-emerald-50 text-emerald-700",
   violet: "border-violet-400 bg-violet-50 text-violet-700",
+  gray: "border-slate-300 bg-slate-50 text-slate-700",
 };
+
+const statusToneMap = {
+  Pending: "amber",
+  Confirmed: "green",
+  Ignored: "gray",
+  Cancelled: "gray",
+};
+
+const statusPanelToneMap = {
+  Pending: "amber",
+  Confirmed: "green",
+  Ignored: "violet",
+  Cancelled: "gray",
+};
+
+const formatMeetingDate = (value) =>
+  new Intl.DateTimeFormat("en-LK", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+
+const formatMeetingTime = (value) =>
+  new Intl.DateTimeFormat("en-LK", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+
+const formatChatTime = (value) =>
+  new Intl.DateTimeFormat("en-LK", {
+    hour: "numeric",
+    minute: "2-digit",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+
+const MotionDiv = motion.div;
 
 function Badge({ label, tone = "gray" }) {
   return (
@@ -131,6 +91,30 @@ function StatCard({ value, label, valueClassName }) {
   );
 }
 
+function MessageBubble({ message, isCurrentUser }) {
+  return (
+    <div className={`flex max-w-[85%] gap-2 ${isCurrentUser ? "ml-auto flex-row-reverse" : ""}`}>
+      {!isCurrentUser ? (
+        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarClassNames.blue}`}>
+          B
+        </div>
+      ) : null}
+      <div>
+        <div
+          className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+            isCurrentUser ? "rounded-br-md bg-indigo-600 text-white" : "rounded-bl-md bg-slate-100 text-slate-700"
+          }`}
+        >
+          {message.text}
+        </div>
+        <p className={`mt-1 px-1 text-[11px] text-slate-400 ${isCurrentUser ? "text-right" : ""}`}>
+          {formatChatTime(message.createdAt)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function Tabs({ items, active }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -151,36 +135,105 @@ function Tabs({ items, active }) {
   );
 }
 
-function MessageBubble({ message }) {
-  const isSent = message.side === "sent";
-
-  return (
-    <div className={`flex max-w-[85%] gap-2 ${isSent ? "ml-auto flex-row-reverse" : ""}`}>
-      {!isSent ? (
-        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${avatarClassNames[message.tone]}`}>
-          {message.initials}
-        </div>
-      ) : null}
-      <div>
-        <div
-          className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
-            isSent
-              ? "rounded-br-md bg-indigo-600 text-white"
-              : "rounded-bl-md bg-slate-100 text-slate-700"
-          }`}
-        >
-          {message.text}
-        </div>
-        <p className={`mt-1 px-1 text-[11px] text-slate-400 ${isSent ? "text-right" : ""}`}>{message.time}</p>
-      </div>
-    </div>
-  );
-}
-
 const SellerScheduleMeetingPage = () => {
+  const [meetings, setMeetings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMeetingId, setSelectedMeetingId] = useState("");
+  const [updatingId, setUpdatingId] = useState("");
+  const [chatMessage, setChatMessage] = useState("");
+  const [sendingChat, setSendingChat] = useState(false);
+
+  const loadMeetings = async () => {
+    const response = await axios.get("/meetings/seller");
+    const items = response.data.data || [];
+    setMeetings(items);
+    setSelectedMeetingId((currentId) => currentId || items[0]?._id || "");
+  };
+
+  useEffect(() => {
+    const fetchMeetings = async () => {
+      try {
+        setLoading(true);
+        await loadMeetings();
+      } catch (error) {
+        toast.error(error.response?.data?.message || "Failed to load seller meetings");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMeetings();
+  }, []);
+
+  const selectedMeeting = useMemo(
+    () => meetings.find((meeting) => meeting._id === selectedMeetingId) || meetings[0] || null,
+    [meetings, selectedMeetingId],
+  );
+
+  const pendingMeetings = useMemo(
+    () => meetings.filter((meeting) => meeting.status === "Pending"),
+    [meetings],
+  );
+
+  const responseMeetings = useMemo(
+    () => meetings.filter((meeting) => meeting.status !== "Pending"),
+    [meetings],
+  );
+
+  const sellerStats = useMemo(
+    () => [
+      { label: "Pending Requests", value: pendingMeetings.length, valueClassName: "text-indigo-600" },
+      {
+        label: "Accepted Requests",
+        value: meetings.filter((meeting) => meeting.status === "Confirmed").length,
+        valueClassName: "text-emerald-600",
+      },
+      {
+        label: "Ignored Requests",
+        value: meetings.filter((meeting) => meeting.status === "Ignored").length,
+        valueClassName: "text-slate-500",
+      },
+    ],
+    [meetings, pendingMeetings.length],
+  );
+
+  const handleStatusUpdate = async (meetingId, status) => {
+    try {
+      setUpdatingId(meetingId);
+      await axios.patch(`/meetings/${meetingId}/status`, { status });
+      toast.success(status === "Confirmed" ? "Meeting confirmed." : "Meeting ignored.");
+      await loadMeetings();
+      setSelectedMeetingId(meetingId);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to update request");
+    } finally {
+      setUpdatingId("");
+    }
+  };
+
+  const handleSendChatMessage = async () => {
+    if (!selectedMeeting?._id || !chatMessage.trim()) {
+      return;
+    }
+
+    try {
+      setSendingChat(true);
+      await axios.post(`/meetings/${selectedMeeting._id}/messages`, {
+        text: chatMessage,
+      });
+      setChatMessage("");
+      await loadMeetings();
+      setSelectedMeetingId(selectedMeeting._id);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send message");
+    } finally {
+      setSendingChat(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#eef2ff_0%,#f8fafc_45%,#f1f5f9_100%)] px-4 py-8 md:px-6 lg:px-8">
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
@@ -202,8 +255,6 @@ const SellerScheduleMeetingPage = () => {
                 </p>
               </div>
             </div>
-
-            
           </div>
         </section>
 
@@ -227,52 +278,70 @@ const SellerScheduleMeetingPage = () => {
                 <SectionLabel>Incoming Meeting Requests</SectionLabel>
                 <div className={sectionCardClass}>
                   <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-                    <h3 className="text-lg font-semibold text-slate-900">Requests (3)</h3>
-                    <button type="button" className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-600">
-                      Newest First
-                    </button>
+                    <h3 className="text-lg font-semibold text-slate-900">Requests ({pendingMeetings.length})</h3>
                   </div>
                   <div className="divide-y divide-slate-100 px-6 py-2">
-                    {incomingRequests.map((request) => (
-                      <div key={request.name} className="flex gap-4 py-5">
-                        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${avatarClassNames[request.avatarTone]}`}>
-                          {request.initials}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-sm font-semibold text-slate-900">{request.name}</h3>
-                            {request.badge ? <Badge label={request.badge.label} tone={request.badge.tone} /> : null}
-                          </div>
-                          {request.lines.map((line, lineIndex) => (
-                            <div key={`${request.name}-${lineIndex}`} className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                              {line.map((item) => (
-                                <span key={item}>{item}</span>
-                              ))}
+                    {loading ? (
+                      <div className="py-6 text-sm text-slate-500">Loading requests...</div>
+                    ) : pendingMeetings.length === 0 ? (
+                      <div className="py-6 text-sm text-slate-500">No pending meeting requests right now.</div>
+                    ) : (
+                      pendingMeetings.map((request) => {
+                        const initials = (request.buyer?.name || "B")
+                          .split(" ")
+                          .map((part) => part[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase();
+
+                        return (
+                          <div key={request._id} className="flex gap-4 py-5">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedMeetingId(request._id)}
+                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}
+                            >
+                              {initials}
+                            </button>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-sm font-semibold text-slate-900">{request.buyer?.name || "Buyer"}</h3>
+                                <Badge label="New" tone="amber" />
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                <span>{request.product?.name || "Product"}</span>
+                                <span>
+                                  {formatMeetingDate(request.scheduledAt)}, {formatMeetingTime(request.scheduledAt)}
+                                </span>
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                <span>{request.durationMinutes} min</span>
+                                <span>{request.location}</span>
+                              </div>
+                              {request.note ? <p className="mt-2 text-xs italic text-slate-500">{request.note}</p> : null}
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  disabled={updatingId === request._id}
+                                  onClick={() => handleStatusUpdate(request._id, "Confirmed")}
+                                  className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-600 disabled:opacity-60"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={updatingId === request._id}
+                                  onClick={() => handleStatusUpdate(request._id, "Ignored")}
+                                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-indigo-300 hover:text-indigo-600 disabled:opacity-60"
+                                >
+                                  Ignore
+                                </button>
+                              </div>
                             </div>
-                          ))}
-                          {request.note ? (
-                            <p className={`mt-2 text-xs ${request.noteTone === "warn" ? "text-amber-600" : "italic text-slate-500"}`}>
-                              {request.note}
-                            </p>
-                          ) : null}
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {request.actions.map((action) => (
-                              <button
-                                key={action}
-                                type="button"
-                                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                                  action === "Accept"
-                                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                                    : "border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600"
-                                }`}
-                              >
-                                {action}
-                              </button>
-                            ))}
                           </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -282,90 +351,153 @@ const SellerScheduleMeetingPage = () => {
                 <div className={sectionCardClass}>
                   <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                     <h3 className="text-lg font-semibold text-slate-900">Buyer Request Status</h3>
-                    
                   </div>
                   <div className="space-y-4 px-6 py-5">
-                    {sellerResponses.map((item) => (
-                      <div
-                        key={`${item.buyer}-${item.status}`}
-                        className={`rounded-2xl border-l-4 p-4 ${responseToneClassNames[item.tone]}`}
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-900">{item.title}</p>
-                            <p className="mt-1 text-sm text-slate-700">{item.buyer}</p>
-                            <p className="mt-1 text-xs text-slate-500">{item.details}</p>
-                          </div>
-                          <Badge
-                            label={item.status}
-                            tone={
-                              item.status === "Accepted"
-                                ? "green"
-                                : item.status === "Pending"
-                                  ? "amber"
-                                  : "gray"
-                            }
-                          />
-                        </div>
+                    {responseMeetings.length === 0 ? (
+                      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                        Confirmed and ignored requests will appear here after you take action.
                       </div>
-                    ))}
+                    ) : (
+                      responseMeetings.map((item) => (
+                        <div
+                          key={item._id}
+                          className={`rounded-2xl border-l-4 p-4 ${responseToneClassNames[statusPanelToneMap[item.status]]}`}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                {item.status === "Confirmed" ? "Accepted Request" : item.status === "Ignored" ? "Ignored Request" : "Cancelled Request"}
+                              </p>
+                              <p className="mt-1 text-sm text-slate-700">{item.buyer?.name || "Buyer"}</p>
+                              <p className="mt-1 text-xs text-slate-500">
+                                {item.product?.name || "Product"} · {formatMeetingDate(item.scheduledAt)} · {formatMeetingTime(item.scheduledAt)} · {item.location}
+                              </p>
+                            </div>
+                            <Badge label={item.status} tone={statusToneMap[item.status]} />
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
-        
-
               <div>
                 <SectionLabel>Chat with Buyer</SectionLabel>
                 <div className={sectionCardClass}>
                   <div className="border-b border-slate-200 px-5 pt-4">
                     <div className="flex gap-3 overflow-x-auto pb-4">
-                      {[
-                        { initials: "K", tone: "blue", active: true, online: true, name: "Kamal" },
-                        { initials: "D", tone: "amber", name: "Dilshan" },
-                        { initials: "R", tone: "violet", online: true, name: "Rashida" },
-                      ].map((person) => (
-                        <div key={person.name} className="flex shrink-0 flex-col items-center gap-2">
-                          <div className="relative">
-                            <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${person.active ? "border-indigo-500" : "border-transparent"} ${avatarClassNames[person.tone]}`}>
-                              {person.initials}
+                      {meetings.map((person) => {
+                        const isActive = selectedMeeting?._id === person._id;
+                        const initials = (person.buyer?.name || "B")
+                          .split(" ")
+                          .map((part) => part[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase();
+
+                        return (
+                          <button
+                            key={person._id}
+                            type="button"
+                            onClick={() => setSelectedMeetingId(person._id)}
+                            className="flex shrink-0 flex-col items-center gap-2"
+                          >
+                            <div className="relative">
+                              <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold ${isActive ? "border-indigo-500" : "border-transparent"} ${avatarClassNames.blue}`}>
+                                {initials}
+                              </div>
+                              {person.status === "Pending" ? <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-amber-500" /> : null}
                             </div>
-                            {person.online ? <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" /> : null}
-                          </div>
-                          <p className={`text-xs font-medium ${person.active ? "text-indigo-600" : "text-slate-500"}`}>{person.name}</p>
-                        </div>
-                      ))}
+                            <p className={`text-xs font-medium ${isActive ? "text-indigo-600" : "text-slate-500"}`}>
+                              {(person.buyer?.name || "Buyer").split(" ")[0]}
+                            </p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
                   <div className="flex h-[340px] flex-col">
                     <div className="flex items-center gap-3 border-b border-indigo-200 bg-indigo-50 px-5 py-4">
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>K</div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-900">Kamal Perera</p>
-                        <p className="text-xs text-slate-500">iphone 13pro</p>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>
+                        {((selectedMeeting?.buyer?.name || "B").slice(0, 1) || "B").toUpperCase()}
                       </div>
-                      <Badge label="Pending Request" tone="amber" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-slate-900">{selectedMeeting?.buyer?.name || "No buyer selected"}</p>
+                        <p className="text-xs text-slate-500">{selectedMeeting?.product?.name || "Pick a meeting to review it"}</p>
+                      </div>
+                      <Badge label={selectedMeeting?.status || "No Request"} tone={statusToneMap[selectedMeeting?.status] || "gray"} />
                     </div>
 
                     <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-                      {sellerMessages.map((message, index) => (
-                        <MessageBubble key={`${message.time}-${index}`} message={message} />
-                      ))}
+                      {selectedMeeting ? (
+                        <>
+                          <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+                            <p className="font-semibold text-slate-900">Requested meetup</p>
+                            <div className="mt-3 space-y-2">
+                              <p className="inline-flex items-center gap-2">
+                                <Clock3 size={14} />
+                                {formatMeetingDate(selectedMeeting.scheduledAt)} at {formatMeetingTime(selectedMeeting.scheduledAt)}
+                              </p>
+                              <p className="inline-flex items-center gap-2">
+                                <MapPin size={14} />
+                                {selectedMeeting.location} · {selectedMeeting.durationMinutes} min
+                              </p>
+                              <p className="inline-flex items-center gap-2">
+                                <Phone size={14} />
+                                {selectedMeeting.buyer?.phone || "No phone number"}
+                              </p>
+                            </div>
+                          </div>
 
-                      
+                          <div className="rounded-2xl bg-indigo-50 p-4 text-sm text-slate-700">
+                            <p className="font-semibold text-slate-900">Buyer note</p>
+                            <p className="mt-3 leading-6">
+                              {selectedMeeting.note || "No extra note was added to this request."}
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            {(selectedMeeting.messages || []).length > 0 ? (
+                              selectedMeeting.messages.map((message) => (
+                                <MessageBubble
+                                  key={message._id}
+                                  message={message}
+                                  isCurrentUser={message.senderRole === "seller"}
+                                />
+                              ))
+                            ) : (
+                              <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">
+                                No chat messages yet. You can send the buyer a quick reply from here.
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                          Meeting details will appear here when a buyer sends a request.
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 border-t border-slate-200 px-5 py-4">
-                      
                       <input
                         type="text"
-                        placeholder="Type a message..."
-                        className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:bg-white"
+                        value={chatMessage}
+                        onChange={(event) => setChatMessage(event.target.value)}
+                        disabled={!selectedMeeting || sendingChat}
+                        placeholder={selectedMeeting ? "Type a message..." : "Choose a meeting first"}
+                        className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
                       />
-                      <button type="button" className="rounded-full bg-indigo-600 p-2.5 text-white transition hover:bg-indigo-700">
+                      <button
+                        type="button"
+                        onClick={handleSendChatMessage}
+                        disabled={!selectedMeeting || sendingChat || !chatMessage.trim()}
+                        className="rounded-full bg-indigo-600 p-2.5 text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                      >
                         <Send size={16} />
                       </button>
                     </div>
@@ -377,7 +509,7 @@ const SellerScheduleMeetingPage = () => {
         </section>
 
        
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 };

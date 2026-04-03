@@ -10,7 +10,8 @@ const DUMMY_SELLER_ID = "000000000000000000000001";
 const ProductDetailPage = () => {
   const { id } = useParams();
   const { user } = useUserStore();
-  const sellerId = useMemo(() => user?._id || user?.id || DUMMY_SELLER_ID, [user]);
+  const currentUserId = user?._id || user?.id || null;
+  const sellerId = useMemo(() => currentUserId || DUMMY_SELLER_ID, [currentUserId]);
 
   const [product, setProduct] = useState(null);
   const [activeImage, setActiveImage] = useState("");
@@ -72,6 +73,8 @@ const ProductDetailPage = () => {
       </div>
     );
   }
+
+  const isOwner = product.sellerId === currentUserId || product.seller?._id === currentUserId;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
@@ -163,29 +166,38 @@ const ProductDetailPage = () => {
             <div className="rounded-[2rem] bg-white p-6 shadow-xl">
               <h2 className="text-2xl font-bold text-gray-800">Seller actions</h2>
               <p className="mt-3 text-sm leading-6 text-gray-500">
-                Contact seller and meeting coordination will be connected in a future feature. This page already keeps the
-                action area ready for that flow.
+                Schedule a meetup with the seller for this specific product and keep the request synced across the buyer and seller dashboards.
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  disabled
-                  className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white opacity-80"
-                >
-                  Contact Seller
-                </button>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white opacity-80"
-                >
-                  <MessageSquareMore size={18} />
-                  Schedule Meeting
-                </button>
+                <div className="rounded-2xl bg-indigo-50 px-5 py-3 text-sm font-medium text-indigo-700">
+                  Seller: {product.seller?.name || "Listing owner"}
+                </div>
+                {user ? (
+                  <Link
+                    to={isOwner ? "/schedule-meeting/seller" : `/schedule-meeting/buyer/${product._id}`}
+                    state={{ product }}
+                    className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white ${
+                      isOwner ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-900 hover:bg-gray-800"
+                    }`}
+                  >
+                    <MessageSquareMore size={18} />
+                    {isOwner ? "View Seller Requests" : "Schedule Meeting"}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+                  >
+                    <MessageSquareMore size={18} />
+                    Login to Schedule
+                  </Link>
+                )}
               </div>
 
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-indigo-500">Coming soon</p>
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-indigo-500">
+                {isOwner ? "Seller dashboard ready" : "Buyer scheduling ready"}
+              </p>
             </div>
 
             <Link

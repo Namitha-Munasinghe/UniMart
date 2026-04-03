@@ -24,7 +24,7 @@ const PRICE_HINTS = [
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
 const resolveSellerId = (req) =>
-  req.headers["x-seller-id"] || req.body.sellerId || req.query.sellerId || DUMMY_SELLER_ID;
+  req.headers["x-seller-id"] || req.body?.sellerId || req.query?.sellerId || DUMMY_SELLER_ID;
 
 const roundPrice = (value) => Math.max(0, Math.round(value / 100) * 100);
 const hasValue = (value) => value !== undefined && value !== null && value !== "";
@@ -41,10 +41,28 @@ const syncExpiredProducts = async () => {
   );
 };
 
-const formatProduct = (product) => ({
-  ...product.toObject(),
-  isExpired: product.expiresAt <= new Date(),
-});
+const formatProduct = (product) => {
+  if (!product) {
+    return null;
+  }
+
+  const plainProduct = product.toObject ? product.toObject() : product;
+
+  return {
+    ...plainProduct,
+    seller:
+      plainProduct.sellerId && typeof plainProduct.sellerId === "object"
+        ? {
+            _id: plainProduct.sellerId._id,
+            name: plainProduct.sellerId.name,
+            email: plainProduct.sellerId.email,
+            phone: plainProduct.sellerId.phone,
+            faculty: plainProduct.sellerId.faculty,
+          }
+        : null,
+    isExpired: plainProduct.expiresAt <= new Date(),
+  };
+};
 
 const ensureValidCategory = (category) => PRODUCT_CATEGORIES.includes(category);
 
@@ -55,7 +73,7 @@ const buildPublicQuery = (extraFilters = {}) => ({
 });
 
 const assertOwner = (product, sellerId) => {
-  if (product.sellerId.toString() !== sellerId) {
+  if (!product?.sellerId || product.sellerId.toString() !== sellerId) {
     return false;
   }
 
@@ -149,7 +167,7 @@ export const updateProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid product or seller id." });
     }
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate("sellerId", "name email phone faculty");
 
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found." });
@@ -200,10 +218,14 @@ export const deleteProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid product or seller id." });
     }
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate("sellerId", "name email phone faculty");
 
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found." });
+    }
+
+    if (!product.sellerId) {
+      return res.status(400).json({ success: false, message: "This product is missing seller information." });
     }
 
     if (!assertOwner(product, sellerId)) {
