@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, Clock3, Package, Sparkles, Tag } from "lucide-react";
+import { ArrowRight, Package, Sparkles } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 
@@ -74,9 +74,11 @@ const HomePage = () => {
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="overflow-hidden rounded-[1.75rem] bg-white p-4 shadow-lg">
                 <div className="h-52 animate-pulse rounded-[1.3rem] bg-indigo-100" />
-                <div className="mt-4 h-5 animate-pulse rounded bg-indigo-100" />
-                <div className="mt-3 h-4 animate-pulse rounded bg-slate-100" />
-                <div className="mt-2 h-4 animate-pulse rounded bg-slate-100" />
+                <div className="mt-4 flex justify-between gap-3">
+                  <div className="h-6 flex-1 animate-pulse rounded bg-indigo-100" />
+                  <div className="h-14 w-24 shrink-0 animate-pulse rounded-2xl bg-indigo-100" />
+                </div>
+                <div className="mt-5 h-12 animate-pulse rounded-2xl bg-slate-200" />
               </div>
             ))}
           </div>
@@ -121,26 +123,6 @@ const HomePage = () => {
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-500">Price</p>
                       <p className="text-lg font-bold text-indigo-700">LKR {product.price}</p>
                     </div>
-                  </div>
-
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">{product.description}</p>
-
-                  <div className="mt-5 space-y-3 rounded-2xl bg-indigo-50/60 p-4">
-                    {/* <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Tag size={16} className="text-indigo-600" />
-                      <span className="font-medium">Category:</span>
-                      <span>{product.category}</span>
-                    </div> */}
-                    <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <CalendarDays size={16} className="text-indigo-600" />
-                      <span className="font-medium">Listed:</span>
-                      <span>{new Date(product.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    {/* <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Clock3 size={16} className="text-indigo-600" />
-                      <span className="font-medium">Expires:</span>
-                      <span>{new Date(product.expiresAt).toLocaleDateString()}</span>
-                    </div> */}
                   </div>
 
                   <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-indigo-700">
