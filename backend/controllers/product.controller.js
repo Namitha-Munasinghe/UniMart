@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
+import Groq from "groq-sdk";
 import Product, { PRODUCT_CATEGORIES } from "../model/product.model.js";
+import User from "../model/user.model.js";
+import Review from "../model/review.model.js";
+import { mapUploadedImageUrls } from "../lib/cloudinary.js";
+
+const PRODUCT_UPLOAD_FOLDER = "UniMart_Products";
 
 const DUMMY_SELLER_ID = process.env.DUMMY_SELLER_ID || "000000000000000000000001";
 
@@ -68,7 +74,7 @@ export const createProduct = async (req, res) => {
 
     const sellerId = resolveSellerId(req);
     const { name, description, price, category } = req.body;
-    const images = req.files ? req.files.map((file) => file.path) : [];
+    const images = mapUploadedImageUrls(req.files, PRODUCT_UPLOAD_FOLDER);
     const numericPrice = Number(price);
 
     if (!isValidObjectId(sellerId)) {
@@ -81,6 +87,10 @@ export const createProduct = async (req, res) => {
 
     if (!images.length) {
       return res.status(400).json({ success: false, message: "At least one image is required." });
+    }
+
+    if (images.length > 5) {
+      return res.status(400).json({ success: false, message: "Maximum 5 images allowed." });
     }
 
     if (!ensureValidCategory(category)) {
@@ -141,9 +151,17 @@ export const updateProduct = async (req, res) => {
 
     const sellerId = resolveSellerId(req);
     const { id } = req.params;
-    const { name, description, price, category, status } = req.body;
-    const uploadedImages = req.files ? req.files.map((file) => file.path) : [];
+    const { name, description, price, category, status, keptImageUrls: keptRaw } = req.body;
+    const uploadedImages = mapUploadedImageUrls(req.files, PRODUCT_UPLOAD_FOLDER);
     const numericPrice = hasValue(price) ? Number(price) : undefined;
+
+    let keptUrls = [];
+    try {
+      const parsed = typeof keptRaw === "string" ? JSON.parse(keptRaw) : keptRaw;
+      if (Array.isArray(parsed)) keptUrls = parsed.filter((u) => typeof u === "string");
+    } catch {
+      keptUrls = [];
+    }
 
     if (!isValidObjectId(sellerId) || !isValidObjectId(id)) {
       return res.status(400).json({ success: false, message: "Invalid product or seller id." });
@@ -176,7 +194,14 @@ export const updateProduct = async (req, res) => {
     if (price !== undefined) product.price = numericPrice;
     if (category !== undefined) product.category = category;
     if (status !== undefined) product.status = status;
-    if (uploadedImages.length) product.images = uploadedImages;
+
+    const mergedImages = [...keptUrls, ...uploadedImages].slice(0, 5);
+    if (keptUrls.length || uploadedImages.length) {
+      if (mergedImages.length < 1) {
+        return res.status(400).json({ success: false, message: "At least one image is required." });
+      }
+      product.images = mergedImages;
+    }
 
     await product.save();
 
@@ -283,9 +308,41 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Product not available." });
     }
 
+    const sellerDoc = await User.findById(product.sellerId).select("name studentId faculty email");
+    const approvedReviews = await Review.find({
+      sellerId: product.sellerId,
+      isFlagged: false,
+      adminStatus: "approved",
+    }).select("rating");
+
+    let sellerTrustLine = "No approved reviews for this seller yet.";
+    if (approvedReviews.length > 0) {
+      const avg =
+        approvedReviews.reduce((sum, r) => sum + r.rating, 0) / approvedReviews.length;
+      if (avg >= 4.2) {
+        sellerTrustLine = "Verified trusted seller — strong buyer ratings.";
+      } else if (avg >= 3.5) {
+        sellerTrustLine = "Reliable seller with positive buyer feedback.";
+      } else {
+        sellerTrustLine = "Check reviews — mixed feedback from buyers.";
+      }
+    }
+
+    const base = formatProduct(product);
     res.status(200).json({
       success: true,
-      data: formatProduct(product),
+      data: {
+        ...base,
+        isOwner,
+        seller: sellerDoc
+          ? {
+              name: sellerDoc.name,
+              studentId: sellerDoc.studentId,
+              faculty: sellerDoc.faculty,
+            }
+          : null,
+        sellerTrustLine,
+      },
     });
   } catch (error) {
     console.error("Get Product By Id Error:", error.message);
@@ -328,9 +385,52 @@ export const suggestProductPrice = async (req, res) => {
         ? similarProducts.reduce((sum, product) => sum + product.price, 0) / similarProducts.length
         : null;
 
-    const suggestedPrice = similarAverage
+    let suggestedPrice = similarAverage
       ? roundPrice((keywordAdjustedBase + similarAverage) / 2)
       : roundPrice(keywordAdjustedBase);
+
+    let reasoning =
+      similarProducts.length > 0
+        ? "Blended category baseline with recent listings in UniMart."
+        : "Based on category baseline; few similar listings in UniMart yet.";
+
+    const groqKey = process.env.GROQ_API_KEY;
+    if (groqKey) {
+      try {
+        const groq = new Groq({ apiKey: groqKey });
+        const aiRes = await groq.chat.completions.create({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "user",
+              content: `You price used items on a Sri Lankan university student marketplace (LKR).
+Product name: "${name}"
+Category: ${category}
+Description: "${description}"
+Return ONLY valid JSON: {"priceLkr": <integer>, "why": "<English, 5-10 words: practical basis for used/campus price>"}
+Use realistic second-hand LKR. No markdown or extra text.`,
+            },
+          ],
+          temperature: 0.3,
+        });
+        const text = aiRes.choices[0]?.message?.content || "";
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          const aiPrice = Number(parsed.priceLkr);
+          const why = typeof parsed.why === "string" ? parsed.why.trim() : "";
+          if (!Number.isNaN(aiPrice) && aiPrice >= 0) {
+            const blended = similarAverage
+              ? roundPrice((aiPrice + similarAverage + keywordAdjustedBase) / 3)
+              : roundPrice((aiPrice + keywordAdjustedBase) / 2);
+            suggestedPrice = blended;
+            reasoning = why || reasoning;
+          }
+        }
+      } catch (aiErr) {
+        console.error("AI price suggestion:", aiErr.message);
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -340,10 +440,7 @@ export const suggestProductPrice = async (req, res) => {
         basedOnCategory: category,
         similarProductsCount: similarProducts.length,
         matchedHints,
-        reasoning:
-          similarProducts.length > 0
-            ? "Suggestion combines the category baseline with recent available products in the same category."
-            : "Suggestion is based on the category baseline and simple keyword analysis because no similar products were found yet.",
+        reasoning,
       },
     });
   } catch (error) {

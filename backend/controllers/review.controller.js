@@ -1,6 +1,7 @@
 import Groq from "groq-sdk";
 import Review from "../model/review.model.js";
 import dotenv from "dotenv";
+import { mapUploadedImageUrls } from "../lib/cloudinary.js";
 
 dotenv.config();
 
@@ -15,8 +16,7 @@ export const submitReview = async (req, res) => {
     try {
         const { buyerId, sellerId, rating, comment } = req.body;
         
-        // Extract Cloudinary URLs from uploaded files (provided by Multer)
-        const proofImages = req.files ? req.files.map(f => f.path) : [];
+        const proofImages = mapUploadedImageUrls(req.files, "UniMart_Reviews");
 
         // Validation: Ensure all required fields are provided
         if (!buyerId || !sellerId || !rating || !comment) {
