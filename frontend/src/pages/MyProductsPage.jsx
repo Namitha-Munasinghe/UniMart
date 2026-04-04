@@ -4,16 +4,9 @@ import { Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
+import { PRODUCT_CATEGORIES } from "../constants/categories";
 
-const PRODUCT_CATEGORIES = [
-  "mobiles",
-  "laptops",
-  "electronics",
-  "accessories",
-  "notes/books",
-  "boarding/rooms",
-  "services",
-];
+const MAX_PRODUCT_IMAGES = 5;
 
 const PRODUCT_STATUSES = ["Available", "Sold", "Hidden"];
 const DUMMY_SELLER_ID = "000000000000000000000001";
@@ -69,7 +62,12 @@ const MyProductsPage = () => {
     const { name, value, files } = event.target;
 
     if (name === "images") {
-      setForm((current) => ({ ...current, images: Array.from(files || []) }));
+      const list = Array.from(files || []);
+      if (list.length > MAX_PRODUCT_IMAGES) {
+        toast.error(`You can select up to ${MAX_PRODUCT_IMAGES} photos. Only the first ${MAX_PRODUCT_IMAGES} were kept.`);
+      }
+      setForm((current) => ({ ...current, images: list.slice(0, MAX_PRODUCT_IMAGES) }));
+      event.target.value = "";
       return;
     }
 
@@ -109,6 +107,11 @@ const MyProductsPage = () => {
 
     if (!editingProductId && form.images.length === 0) {
       toast.error("Please upload at least one image");
+      return;
+    }
+
+    if (form.images.length > MAX_PRODUCT_IMAGES) {
+      toast.error(`You can upload at most ${MAX_PRODUCT_IMAGES} photos per product`);
       return;
     }
 
@@ -214,7 +217,7 @@ const MyProductsPage = () => {
                   {editingProductId ? "Edit Product" : "Add Product"}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Images are uploaded as files, and the product is stored under your seller profile.
+                  Add up to {MAX_PRODUCT_IMAGES} photos per listing. Images are stored with your seller profile.
                 </p>
               </div>
               {editingProductId && (

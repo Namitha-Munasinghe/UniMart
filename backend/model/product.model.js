@@ -12,6 +12,15 @@ export const PRODUCT_CATEGORIES = [
 
 export const PRODUCT_STATUSES = ["Available", "Sold", "Hidden", "Expired"];
 
+/** Listings stay visible until this many months after creation (then marked Expired by sync). */
+const LISTING_ACTIVE_MONTHS = 3;
+
+const listingExpiresAt = () => {
+  const expiresAt = new Date();
+  expiresAt.setMonth(expiresAt.getMonth() + LISTING_ACTIVE_MONTHS);
+  return expiresAt;
+};
+
 const productSchema = new mongoose.Schema(
   {
     sellerId: {
@@ -55,11 +64,7 @@ const productSchema = new mongoose.Schema(
     },
     expiresAt: {
       type: Date,
-      default: () => {
-        const expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + 3);
-        return expiresAt;
-      },
+      default: listingExpiresAt,
       index: true,
     },
   },

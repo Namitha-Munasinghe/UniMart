@@ -73,7 +73,8 @@ const buildPublicQuery = (extraFilters = {}) => ({
 });
 
 const assertOwner = (product, sellerId) => {
-  if (!product?.sellerId || product.sellerId.toString() !== sellerId) {
+  const ownerId = product?.sellerId?._id ?? product?.sellerId;
+  if (!ownerId || String(ownerId) !== String(sellerId)) {
     return false;
   }
 
@@ -101,6 +102,10 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "At least one image is required." });
     }
 
+    if (images.length > 5) {
+      return res.status(400).json({ success: false, message: "You can upload at most 5 images per product." });
+    }
+
     if (!ensureValidCategory(category)) {
       return res.status(400).json({ success: false, message: "Invalid category selected." });
     }
@@ -118,6 +123,8 @@ export const createProduct = async (req, res) => {
       category,
       status: "Available",
     });
+
+    await newProduct.populate("sellerId", "name email phone faculty");
 
     res.status(201).json({
       success: true,
@@ -140,7 +147,9 @@ export const getMyProducts = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid sellerId." });
     }
 
-    const products = await Product.find({ sellerId }).sort({ createdAt: -1 });
+    const products = await Product.find({ sellerId })
+      .populate("sellerId", "name email phone faculty")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -194,7 +203,12 @@ export const updateProduct = async (req, res) => {
     if (price !== undefined) product.price = numericPrice;
     if (category !== undefined) product.category = category;
     if (status !== undefined) product.status = status;
-    if (uploadedImages.length) product.images = uploadedImages;
+    if (uploadedImages.length) {
+      if (uploadedImages.length > 5) {
+        return res.status(400).json({ success: false, message: "You can upload at most 5 images per product." });
+      }
+      product.images = uploadedImages;
+    }
 
     await product.save();
 
@@ -245,7 +259,9 @@ export const getAvailableProducts = async (_req, res) => {
   try {
     await syncExpiredProducts();
 
-    const products = await Product.find(buildPublicQuery()).sort({ createdAt: -1 });
+    const products = await Product.find(buildPublicQuery())
+      .populate("sellerId", "name email phone faculty")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -268,7 +284,9 @@ export const getProductsByCategory = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid category selected." });
     }
 
-    const products = await Product.find(buildPublicQuery({ category })).sort({ createdAt: -1 });
+    const products = await Product.find(buildPublicQuery({ category }))
+      .populate("sellerId", "name email phone faculty")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -292,7 +310,7 @@ export const getProductById = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid product id." });
     }
 
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).populate("sellerId", "name email phone faculty");
 
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found." });

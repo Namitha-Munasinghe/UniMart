@@ -1,19 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, Clock3, Package, Sparkles, Tag } from "lucide-react";
+import { ArrowRight, CalendarDays, LayoutGrid, Package, Sparkles, User } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
+import { PRODUCT_CATEGORIES, categoryDisplayName } from "../constants/categories";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState(null);
+
+  const filteredProducts = useMemo(() => {
+    if (!categoryFilter) {
+      return products;
+    }
+    return products.filter((p) => p.category === categoryFilter);
+  }, [products, categoryFilter]);
 
   useEffect(() => {
     const loadLatestProducts = async () => {
       try {
         setLoading(true);
         const response = await axios.get("/products/available");
-        setProducts((response.data.data || []).slice(0, 8));
+        setProducts(response.data.data || []);
       } catch (error) {
         toast.error(error.response?.data?.message || "Failed to load products");
       } finally {
@@ -58,14 +67,64 @@ const HomePage = () => {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+        <div className="rounded-[2rem] border border-indigo-100 bg-white/90 p-6 shadow-lg sm:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+                <LayoutGrid size={22} />
+              </span>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Shop by category</p>
+                <h2 className="text-xl font-bold text-gray-800 sm:text-2xl">Browse listings</h2>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setCategoryFilter(null)}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                categoryFilter === null
+                  ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
+                  : "border-indigo-200 bg-indigo-50/80 text-indigo-800 hover:border-indigo-300 hover:bg-indigo-100"
+              }`}
+            >
+              All
+            </button>
+            {PRODUCT_CATEGORIES.map((slug) => (
+              <button
+                key={slug}
+                type="button"
+                onClick={() => setCategoryFilter(slug)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  categoryFilter === slug
+                    ? "border-indigo-600 bg-indigo-600 text-white shadow-md"
+                    : "border-indigo-200 bg-indigo-50/80 text-indigo-800 hover:border-indigo-300 hover:bg-indigo-100"
+                }`}
+              >
+                {categoryDisplayName(slug)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Latest Listed Products</p>
-            <h2 className="mt-2 text-3xl font-bold text-gray-800">Recently added listings</h2>
+            <h2 className="mt-2 text-3xl font-bold text-gray-800">
+              {categoryFilter ? categoryDisplayName(categoryFilter) : "Recently added listings"}
+            </h2>
+            {categoryFilter && (
+              <p className="mt-1 text-sm text-gray-500">
+                Showing {filteredProducts.length} of {products.length} available listings
+              </p>
+            )}
           </div>
           <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow">
-            Available products only
+            {categoryFilter ? `Category: ${categoryDisplayName(categoryFilter)}` : "Available products only"}
           </div>
         </div>
 
@@ -76,7 +135,6 @@ const HomePage = () => {
                 <div className="h-52 animate-pulse rounded-[1.3rem] bg-indigo-100" />
                 <div className="mt-4 h-5 animate-pulse rounded bg-indigo-100" />
                 <div className="mt-3 h-4 animate-pulse rounded bg-slate-100" />
-                <div className="mt-2 h-4 animate-pulse rounded bg-slate-100" />
               </div>
             ))}
           </div>
@@ -88,9 +146,18 @@ const HomePage = () => {
               Once sellers add products with status set to Available, they will appear here automatically.
             </p>
           </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="rounded-[2rem] border border-dashed border-indigo-200 bg-white/90 p-10 text-center shadow-sm">
+            <Package className="mx-auto h-10 w-10 text-indigo-300" />
+            <h3 className="mt-4 text-xl font-semibold text-gray-800">No listings in this category</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Try another category or choose <span className="font-medium text-indigo-700">All</span> to see every
+              available item.
+            </p>
+          </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <Link
                 key={product._id}
                 to={`/products/${product._id}`}
@@ -123,24 +190,17 @@ const HomePage = () => {
                     </div>
                   </div>
 
-                  <p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">{product.description}</p>
-
                   <div className="mt-5 space-y-3 rounded-2xl bg-indigo-50/60 p-4">
-                    {/* <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Tag size={16} className="text-indigo-600" />
-                      <span className="font-medium">Category:</span>
-                      <span>{product.category}</span>
-                    </div> */}
+                    <div className="flex items-center gap-3 text-sm text-gray-700">
+                      <User size={16} className="shrink-0 text-indigo-600" />
+                      <span className="font-medium">Seller:</span>
+                      <span className="truncate">{product.seller?.name || "Unknown seller"}</span>
+                    </div>
                     <div className="flex items-center gap-3 text-sm text-gray-700">
                       <CalendarDays size={16} className="text-indigo-600" />
                       <span className="font-medium">Listed:</span>
                       <span>{new Date(product.createdAt).toLocaleDateString()}</span>
                     </div>
-                    {/* <div className="flex items-center gap-3 text-sm text-gray-700">
-                      <Clock3 size={16} className="text-indigo-600" />
-                      <span className="font-medium">Expires:</span>
-                      <span>{new Date(product.expiresAt).toLocaleDateString()}</span>
-                    </div> */}
                   </div>
 
                   <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-indigo-700">
