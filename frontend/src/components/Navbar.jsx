@@ -1,7 +1,7 @@
 // Navbar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import { Search, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import unimart from "../assets/unimart.png";
 
@@ -25,6 +25,14 @@ const Navbar = () => {
         </NavLink>
 
         <div className="flex items-center space-x-5">
+          <NavLink
+            to="/browse"
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-gray-700 hover:text-indigo-600"
+            title="Search products"
+          >
+            <Search className="w-5 h-5" />
+            <span className="hidden sm:inline">Search</span>
+          </NavLink>
           {/* Favorites / Heart */}
           <NavLink to="/favourites">
             <Heart className="w-6 h-6 text-gray-700 hover:text-red-500 cursor-pointer transition" />

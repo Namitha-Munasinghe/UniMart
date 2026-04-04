@@ -261,6 +261,75 @@ export const getAvailableProducts = async (_req, res) => {
   }
 };
 
+const SORT_OPTIONS = new Set(["new", "price_low", "price_high", "name_az", "name_za"]);
+
+export const listProductCategories = async (_req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      data: PRODUCT_CATEGORIES,
+    });
+  } catch (error) {
+    console.error("List Product Categories Error:", error.message);
+    res.status(500).json({ success: false, message: "Server Error: " + error.message });
+  }
+};
+
+export const browseProducts = async (req, res) => {
+  try {
+    await syncExpiredProducts();
+
+    const { category, q, minPrice, maxPrice, sort: sortRaw } = req.query;
+    const sort = SORT_OPTIONS.has(sortRaw) ? sortRaw : "new";
+
+    const filter = buildPublicQuery();
+
+    if (category && category !== "all") {
+      if (!ensureValidCategory(category)) {
+        return res.status(400).json({ success: false, message: "Invalid category." });
+      }
+      filter.category = category;
+    }
+
+    const term = typeof q === "string" ? q.trim() : "";
+    if (term) {
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.$or = [
+        { name: { $regex: escaped, $options: "i" } },
+        { description: { $regex: escaped, $options: "i" } },
+      ];
+    }
+
+    let lo = minPrice !== undefined && minPrice !== "" ? Number(minPrice) : NaN;
+    let hi = maxPrice !== undefined && maxPrice !== "" ? Number(maxPrice) : NaN;
+    if (!Number.isNaN(lo) && !Number.isNaN(hi) && lo > hi) {
+      [lo, hi] = [hi, lo];
+    }
+
+    const priceCond = {};
+    if (!Number.isNaN(lo) && lo >= 0) priceCond.$gte = lo;
+    if (!Number.isNaN(hi) && hi >= 0) priceCond.$lte = hi;
+    if (Object.keys(priceCond).length) filter.price = priceCond;
+
+    let sortOption = { createdAt: -1 };
+    if (sort === "price_low") sortOption = { price: 1 };
+    else if (sort === "price_high") sortOption = { price: -1 };
+    else if (sort === "name_az") sortOption = { name: 1 };
+    else if (sort === "name_za") sortOption = { name: -1 };
+
+    const products = await Product.find(filter).sort(sortOption);
+
+    res.status(200).json({
+      success: true,
+      totalProducts: products.length,
+      data: products.map(formatProduct),
+    });
+  } catch (error) {
+    console.error("Browse Products Error:", error.message);
+    res.status(500).json({ success: false, message: "Server Error: " + error.message });
+  }
+};
+
 export const getProductsByCategory = async (req, res) => {
   try {
     await syncExpiredProducts();

@@ -16,6 +16,7 @@ import BuyerScheduleMeetingPage from "./pages/BuyerScheduleMeetingPage";
 import SellerScheduleMeetingPage from "./pages/SellerScheduleMeetingPage";
 import MyProductsPage from "./pages/MyProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import ProductBrowsePage from "./pages/ProductBrowsePage";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -32,6 +33,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/browse" element={<ProductBrowsePage />} />
           <Route path="/schedule-meeting/buyer" element={user?<BuyerScheduleMeetingPage />:<Navigate to="/" />} />
           <Route path="/schedule-meeting/seller" element={user?<SellerScheduleMeetingPage />:<Navigate to="/" />} />
           <Route

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Package, Sparkles } from "lucide-react";
+import { Package, Search, Sparkles } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
+import ProductListingCard from "../components/ProductListingCard";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -40,6 +41,13 @@ const HomePage = () => {
               <p className="mt-4 max-w-2xl text-sm leading-7 text-indigo-50 sm:text-base">
                 Buy what you need or sell what you don’t. Meet up between lectures to complete your trade instantly.
               </p>
+              <Link
+                to="/browse"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-indigo-700 shadow-md transition hover:bg-indigo-50"
+              >
+                <Search className="h-4 w-4" aria-hidden />
+                Search products
+              </Link>
             </div>
 
             <div className="grid gap-4 self-end sm:grid-cols-2 md:grid-cols-1">
@@ -59,13 +67,22 @@ const HomePage = () => {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Latest Listed Products</p>
             <h2 className="mt-2 text-3xl font-bold text-gray-800">Recently added listings</h2>
           </div>
-          <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow">
-            Available products only
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/browse"
+              className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-indigo-700"
+            >
+              <Search className="h-4 w-4" aria-hidden />
+              Search
+            </Link>
+            <div className="rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow">
+              Available products only
+            </div>
           </div>
         </div>
 
@@ -93,44 +110,7 @@ const HomePage = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {products.map((product) => (
-              <Link
-                key={product._id}
-                to={`/products/${product._id}`}
-                className="group overflow-hidden rounded-[1.75rem] bg-white shadow-lg ring-1 ring-indigo-100 transition hover:-translate-y-1 hover:shadow-2xl"
-              >
-                <div className="relative">
-                  <img
-                    src={product.images?.[0]}
-                    alt={product.name}
-                    className="h-56 w-full object-cover"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-indigo-950/80 via-indigo-950/10 to-transparent px-4 pb-4 pt-10">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="rounded-full bg-emerald-400 px-3 py-1 text-xs font-semibold text-slate-900">
-                        {product.status}
-                      </span>
-                      <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-indigo-700">
-                        {product.category}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="line-clamp-2 text-xl font-bold text-gray-800">{product.name}</h3>
-                    <div className="shrink-0 rounded-2xl bg-indigo-50 px-3 py-2 text-right">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-500">Price</p>
-                      <p className="text-lg font-bold text-indigo-700">LKR {product.price}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white transition group-hover:bg-indigo-700">
-                    <span>View full details</span>
-                    <ArrowRight size={18} />
-                  </div>
-                </div>
-              </Link>
+              <ProductListingCard key={product._id} product={product} />
             ))}
           </div>
         )}

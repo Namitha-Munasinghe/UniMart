@@ -1,11 +1,13 @@
 import express from "express";
 import {
+  browseProducts,
   createProduct,
   deleteProduct,
   getAvailableProducts,
   getMyProducts,
   getProductById,
   getProductsByCategory,
+  listProductCategories,
   suggestProductPrice,
   updateProduct,
 } from "../controllers/product.controller.js";
@@ -15,6 +17,8 @@ const router = express.Router();
 const productUpload = createCloudinaryUpload("UniMart_Products");
 
 router.get("/available", getAvailableProducts);
+router.get("/categories", listProductCategories);
+router.get("/browse", browseProducts);
 router.get("/category/:category", getProductsByCategory);
 router.get("/my-products", getMyProducts);
 router.post("/suggest-price", suggestProductPrice);
