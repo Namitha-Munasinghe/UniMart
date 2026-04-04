@@ -1,7 +1,7 @@
 // Navbar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Heart } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Heart, CalendarDays } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import unimart from "../assets/unimart.png";
 
@@ -9,7 +9,7 @@ const Navbar = () => {
   const { user, logout } = useUserStore(); // make sure your store has a logout function
 
   const isAdmin = user?.role === "admin";
-  const linkClass = "hover:text-indigo-600 transition";
+  const meetingsPath = !isAdmin ? "/my-meetings" : null;
 
   const handleLogout = () => {
     logout(); // call store logout
@@ -49,6 +49,16 @@ const Navbar = () => {
             </>
           ) : (
             <>
+              {meetingsPath && (
+                <NavLink
+                  to={meetingsPath}
+                  className="hidden md:flex items-center gap-2 text-gray-700 hover:text-indigo-600 font-medium transition"
+                >
+                  <CalendarDays size={18} />
+                  My Meetings
+                </NavLink>
+              )}
+
               {/* Profile */}
               <NavLink to="/profile">
                 <User className="w-6 h-6 text-gray-700 hover:text-indigo-600 cursor-pointer transition" />

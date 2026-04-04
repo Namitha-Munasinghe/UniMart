@@ -175,7 +175,7 @@ const ProductDetailPage = () => {
                 </div>
                 {user ? (
                   <Link
-                    to={isOwner ? "/schedule-meeting/seller" : `/schedule-meeting/buyer/${product._id}`}
+                    to={isOwner ? `/schedule-meeting/seller/${product._id}` : `/schedule-meeting/buyer/${product._id}`}
                     state={{ product }}
                     className={`inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white ${
                       isOwner ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-900 hover:bg-gray-800"

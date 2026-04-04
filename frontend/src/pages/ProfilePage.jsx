@@ -12,6 +12,7 @@ import {
   Edit,
   Trash2,
   Package,
+  MessageSquareMore,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
@@ -21,6 +22,8 @@ const ProfilePage = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (!user) return null;
+
+  const meetingsPath = user.role !== "admin" ? "/my-meetings" : null;
 
   const today = new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -166,12 +169,23 @@ const ProfilePage = () => {
         </div>
 
         <div className="mt-10 border-t pt-6 flex flex-wrap justify-between gap-3">
-          <Link to="/my-products">
-            <button className="flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition">
-              <Package size={18} />
-              My Products
-            </button>
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/my-products">
+              <button className="flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition">
+                <Package size={18} />
+                My Products
+              </button>
+            </Link>
+
+            {meetingsPath && (
+              <Link to={meetingsPath}>
+                <button className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition">
+                  <MessageSquareMore size={18} />
+                  My Meetings
+                </button>
+              </Link>
+            )}
+          </div>
 
           <div className="flex flex-wrap justify-end gap-3">
             <button

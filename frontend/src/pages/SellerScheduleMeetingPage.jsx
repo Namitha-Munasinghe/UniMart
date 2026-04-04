@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CalendarRange, Clock3, MapPin, Phone, Send } from "lucide-react";
+import { ArrowLeft, CalendarRange, Clock3, MapPin, Phone, Send } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 
@@ -136,6 +137,7 @@ function Tabs({ items, active }) {
 }
 
 const SellerScheduleMeetingPage = () => {
+  const { productId } = useParams();
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMeetingId, setSelectedMeetingId] = useState("");
@@ -165,36 +167,45 @@ const SellerScheduleMeetingPage = () => {
     fetchMeetings();
   }, []);
 
-  const selectedMeeting = useMemo(
-    () => meetings.find((meeting) => meeting._id === selectedMeetingId) || meetings[0] || null,
-    [meetings, selectedMeetingId],
+  const selectedProduct = useMemo(
+    () => meetings.find((meeting) => (meeting.product?._id || meeting.productId) === productId)?.product || null,
+    [meetings, productId],
   );
 
-  const pendingMeetings = useMemo(
-    () => meetings.filter((meeting) => meeting.status === "Pending"),
-    [meetings],
+  const filteredMeetings = useMemo(() => {
+    if (!productId) {
+      return meetings;
+    }
+
+    return meetings.filter((meeting) => (meeting.product?._id || meeting.productId) === productId);
+  }, [meetings, productId]);
+
+  const filteredPendingMeetings = useMemo(
+    () => filteredMeetings.filter((meeting) => meeting.status === "Pending"),
+    [filteredMeetings],
   );
 
-  const responseMeetings = useMemo(
-    () => meetings.filter((meeting) => meeting.status !== "Pending"),
-    [meetings],
+  const filteredResponseMeetings = useMemo(
+    () => filteredMeetings.filter((meeting) => meeting.status !== "Pending"),
+    [filteredMeetings],
   );
 
+  const meetingPeople = filteredMeetings;
   const sellerStats = useMemo(
     () => [
-      { label: "Pending Requests", value: pendingMeetings.length, valueClassName: "text-indigo-600" },
+      { label: "Pending Requests", value: filteredPendingMeetings.length, valueClassName: "text-indigo-600" },
       {
         label: "Accepted Requests",
-        value: meetings.filter((meeting) => meeting.status === "Confirmed").length,
+        value: filteredMeetings.filter((meeting) => meeting.status === "Confirmed").length,
         valueClassName: "text-emerald-600",
       },
       {
         label: "Ignored Requests",
-        value: meetings.filter((meeting) => meeting.status === "Ignored").length,
+        value: filteredMeetings.filter((meeting) => meeting.status === "Ignored").length,
         valueClassName: "text-slate-500",
       },
     ],
-    [meetings, pendingMeetings.length],
+    [filteredMeetings, filteredPendingMeetings.length],
   );
 
   const handleStatusUpdate = async (meetingId, status) => {
@@ -212,24 +223,39 @@ const SellerScheduleMeetingPage = () => {
   };
 
   const handleSendChatMessage = async () => {
-    if (!selectedMeeting?._id || !chatMessage.trim()) {
+    if (!currentMeeting?._id || !chatMessage.trim()) {
       return;
     }
 
     try {
       setSendingChat(true);
-      await axios.post(`/meetings/${selectedMeeting._id}/messages`, {
+      await axios.post(`/meetings/${currentMeeting._id}/messages`, {
         text: chatMessage,
       });
       setChatMessage("");
       await loadMeetings();
-      setSelectedMeetingId(selectedMeeting._id);
+      setSelectedMeetingId(currentMeeting._id);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send message");
     } finally {
       setSendingChat(false);
     }
   };
+
+  useEffect(() => {
+    setSelectedMeetingId((currentId) => {
+      if (filteredMeetings.some((meeting) => meeting._id === currentId)) {
+        return currentId;
+      }
+
+      return filteredMeetings[0]?._id || "";
+    });
+  }, [filteredMeetings]);
+
+  const currentMeeting = useMemo(
+    () => filteredMeetings.find((meeting) => meeting._id === selectedMeetingId) || filteredMeetings[0] || null,
+    [filteredMeetings, selectedMeetingId],
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#eef2ff_0%,#f8fafc_45%,#f1f5f9_100%)] px-4 py-8 md:px-6 lg:px-8">
@@ -255,6 +281,22 @@ const SellerScheduleMeetingPage = () => {
                 </p>
               </div>
             </div>
+            {productId ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Focused Product</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900">{selectedProduct?.name || "Selected listing"}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {filteredMeetings.length} meeting{filteredMeetings.length === 1 ? "" : "s"} connected to this listing
+                </p>
+                <Link
+                  to="/my-meetings"
+                  className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                >
+                  <ArrowLeft size={16} />
+                  Back to My Meetings
+                </Link>
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -278,15 +320,17 @@ const SellerScheduleMeetingPage = () => {
                 <SectionLabel>Incoming Meeting Requests</SectionLabel>
                 <div className={sectionCardClass}>
                   <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-                    <h3 className="text-lg font-semibold text-slate-900">Requests ({pendingMeetings.length})</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">Requests ({filteredPendingMeetings.length})</h3>
                   </div>
                   <div className="divide-y divide-slate-100 px-6 py-2">
                     {loading ? (
                       <div className="py-6 text-sm text-slate-500">Loading requests...</div>
-                    ) : pendingMeetings.length === 0 ? (
-                      <div className="py-6 text-sm text-slate-500">No pending meeting requests right now.</div>
+                    ) : filteredPendingMeetings.length === 0 ? (
+                      <div className="py-6 text-sm text-slate-500">
+                        {productId ? "No pending meeting requests for this product right now." : "No pending meeting requests right now."}
+                      </div>
                     ) : (
-                      pendingMeetings.map((request) => {
+                      filteredPendingMeetings.map((request) => {
                         const initials = (request.buyer?.name || "B")
                           .split(" ")
                           .map((part) => part[0])
@@ -353,12 +397,14 @@ const SellerScheduleMeetingPage = () => {
                     <h3 className="text-lg font-semibold text-slate-900">Buyer Request Status</h3>
                   </div>
                   <div className="space-y-4 px-6 py-5">
-                    {responseMeetings.length === 0 ? (
+                    {filteredResponseMeetings.length === 0 ? (
                       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                        Confirmed and ignored requests will appear here after you take action.
+                        {productId
+                          ? "Confirmed, ignored, and cancelled requests for this product will appear here."
+                          : "Confirmed and ignored requests will appear here after you take action."}
                       </div>
                     ) : (
-                      responseMeetings.map((item) => (
+                      filteredResponseMeetings.map((item) => (
                         <div
                           key={item._id}
                           className={`rounded-2xl border-l-4 p-4 ${responseToneClassNames[statusPanelToneMap[item.status]]}`}
@@ -389,8 +435,8 @@ const SellerScheduleMeetingPage = () => {
                 <div className={sectionCardClass}>
                   <div className="border-b border-slate-200 px-5 pt-4">
                     <div className="flex gap-3 overflow-x-auto pb-4">
-                      {meetings.map((person) => {
-                        const isActive = selectedMeeting?._id === person._id;
+                      {meetingPeople.map((person) => {
+                        const isActive = currentMeeting?._id === person._id;
                         const initials = (person.buyer?.name || "B")
                           .split(" ")
                           .map((part) => part[0])
@@ -423,32 +469,32 @@ const SellerScheduleMeetingPage = () => {
                   <div className="flex h-[340px] flex-col">
                     <div className="flex items-center gap-3 border-b border-indigo-200 bg-indigo-50 px-5 py-4">
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>
-                        {((selectedMeeting?.buyer?.name || "B").slice(0, 1) || "B").toUpperCase()}
+                        {((currentMeeting?.buyer?.name || "B").slice(0, 1) || "B").toUpperCase()}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-900">{selectedMeeting?.buyer?.name || "No buyer selected"}</p>
-                        <p className="text-xs text-slate-500">{selectedMeeting?.product?.name || "Pick a meeting to review it"}</p>
+                        <p className="text-sm font-semibold text-slate-900">{currentMeeting?.buyer?.name || "No buyer selected"}</p>
+                        <p className="text-xs text-slate-500">{currentMeeting?.product?.name || "Pick a meeting to review it"}</p>
                       </div>
-                      <Badge label={selectedMeeting?.status || "No Request"} tone={statusToneMap[selectedMeeting?.status] || "gray"} />
+                      <Badge label={currentMeeting?.status || "No Request"} tone={statusToneMap[currentMeeting?.status] || "gray"} />
                     </div>
 
                     <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
-                      {selectedMeeting ? (
+                      {currentMeeting ? (
                         <>
                           <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
                             <p className="font-semibold text-slate-900">Requested meetup</p>
                             <div className="mt-3 space-y-2">
                               <p className="inline-flex items-center gap-2">
                                 <Clock3 size={14} />
-                                {formatMeetingDate(selectedMeeting.scheduledAt)} at {formatMeetingTime(selectedMeeting.scheduledAt)}
+                                {formatMeetingDate(currentMeeting.scheduledAt)} at {formatMeetingTime(currentMeeting.scheduledAt)}
                               </p>
                               <p className="inline-flex items-center gap-2">
                                 <MapPin size={14} />
-                                {selectedMeeting.location} · {selectedMeeting.durationMinutes} min
+                                {currentMeeting.location} · {currentMeeting.durationMinutes} min
                               </p>
                               <p className="inline-flex items-center gap-2">
                                 <Phone size={14} />
-                                {selectedMeeting.buyer?.phone || "No phone number"}
+                                {currentMeeting.buyer?.phone || "No phone number"}
                               </p>
                             </div>
                           </div>
@@ -456,13 +502,13 @@ const SellerScheduleMeetingPage = () => {
                           <div className="rounded-2xl bg-indigo-50 p-4 text-sm text-slate-700">
                             <p className="font-semibold text-slate-900">Buyer note</p>
                             <p className="mt-3 leading-6">
-                              {selectedMeeting.note || "No extra note was added to this request."}
+                              {currentMeeting.note || "No extra note was added to this request."}
                             </p>
                           </div>
 
                           <div className="space-y-3">
-                            {(selectedMeeting.messages || []).length > 0 ? (
-                              selectedMeeting.messages.map((message) => (
+                            {(currentMeeting.messages || []).length > 0 ? (
+                              currentMeeting.messages.map((message) => (
                                 <MessageBubble
                                   key={message._id}
                                   message={message}
@@ -488,14 +534,14 @@ const SellerScheduleMeetingPage = () => {
                         type="text"
                         value={chatMessage}
                         onChange={(event) => setChatMessage(event.target.value)}
-                        disabled={!selectedMeeting || sendingChat}
-                        placeholder={selectedMeeting ? "Type a message..." : "Choose a meeting first"}
+                        disabled={!currentMeeting || sendingChat}
+                        placeholder={currentMeeting ? "Type a message..." : "Choose a meeting first"}
                         className="flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-indigo-400 focus:bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
                       />
                       <button
                         type="button"
                         onClick={handleSendChatMessage}
-                        disabled={!selectedMeeting || sendingChat || !chatMessage.trim()}
+                        disabled={!currentMeeting || sendingChat || !chatMessage.trim()}
                         className="rounded-full bg-indigo-600 p-2.5 text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                       >
                         <Send size={16} />
