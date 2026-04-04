@@ -1,5 +1,7 @@
 import Groq from "groq-sdk";
+import fs from "fs/promises";
 import Review from "../model/review.model.js";
+import Product from "../model/product.model.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -7,13 +9,75 @@ dotenv.config();
 // Initialize Groq AI with the API Key from your .env file
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// Groq: llama-3.2-11b-vision-* was retired; official replacement is Llama 4 Scout (vision).
+// See https://console.groq.com/docs/deprecations and https://console.groq.com/docs/vision
+const GROQ_VISION_MODEL =
+    process.env.GROQ_VISION_MODEL || "meta-llama/llama-4-scout-17b-16e-instruct";
+
+/**
+ * Load image bytes from a Cloudinary HTTPS URL or a local filesystem path (multer disk).
+ */
+async function loadImageBuffer(imageRef) {
+    if (typeof imageRef === "string" && /^https?:\/\//i.test(imageRef)) {
+        const res = await fetch(imageRef);
+        if (!res.ok) {
+            throw new Error(`Failed to fetch image: ${res.status}`);
+        }
+        const mime = (res.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
+        const buf = Buffer.from(await res.arrayBuffer());
+        return { buffer: buf, mime };
+    }
+    const buf = await fs.readFile(imageRef);
+    return { buffer: buf, mime: "image/jpeg" };
+}
+
+function parseVisionTrueFalse(text) {
+    const t = (text || "").trim().toLowerCase();
+    if (/\bfalse\b/.test(t)) return false;
+    if (/\btrue\b/.test(t)) return true;
+    return false;
+}
+
+/**
+ * Sends one image as base64 data URL to Groq Vision. Returns true only if model answers "true".
+ */
+async function verifyProofImageMatchesProduct(imageRef, productName) {
+    const { buffer, mime } = await loadImageBuffer(imageRef);
+    const base64 = buffer.toString("base64");
+    const dataUrl = `data:${mime};base64,${base64}`;
+
+    const completion = await groq.chat.completions.create({
+        model: GROQ_VISION_MODEL,
+        messages: [
+            {
+                role: "user",
+                content: [
+                    {
+                        type: "text",
+                        text: `Does this image realistically depict a ${productName} or a related part? Answer ONLY with the word "true" or "false".`,
+                    },
+                    {
+                        type: "image_url",
+                        image_url: { url: dataUrl },
+                    },
+                ],
+            },
+        ],
+        temperature: 0,
+        max_completion_tokens: 32,
+    });
+
+    const raw = completion.choices[0]?.message?.content || "";
+    return parseVisionTrueFalse(raw);
+}
+
 /**
  * @desc    Submit a new review, perform AI moderation, and save to DB
  * @route   POST /api/reviews/submit
  */
 export const submitReview = async (req, res) => {
     try {
-        const { buyerId, sellerId, rating, comment } = req.body;
+        const { buyerId, sellerId, rating, comment, productId } = req.body;
         
         // Extract Cloudinary URLs from uploaded files (provided by Multer)
         const proofImages = req.files ? req.files.map(f => f.path) : [];
@@ -24,6 +88,33 @@ export const submitReview = async (req, res) => {
                 success: false, 
                 message: "All fields are required." 
             });
+        }
+
+        if (proofImages.length > 0) {
+            if (!productId) {
+                return res.status(400).json({
+                    success: false,
+                    message: "productId is required when uploading proof images.",
+                });
+            }
+            const product = await Product.findById(productId).select("name").lean();
+            if (!product) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Product not found.",
+                });
+            }
+            const productName = product.name;
+
+            for (const imageRef of proofImages) {
+                const ok = await verifyProofImageMatchesProduct(imageRef, productName);
+                if (!ok) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid Image! Please upload a real photo of the product.",
+                    });
+                }
+            }
         }
         
         // AI Moderation: Check for hate speech, profanity, and detect sentiment

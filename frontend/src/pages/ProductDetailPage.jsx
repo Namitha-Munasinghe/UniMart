@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CalendarDays, Clock3, MessageSquareMore, Package, Sparkles, Star, Tag } from "lucide-react";
+import {
+  CalendarDays,
+  Clock3,
+  MessageSquareMore,
+  Package,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Tag,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 import { useUserStore } from "../stores/useUserStore";
@@ -83,6 +92,14 @@ const ProductDetailPage = () => {
       return;
     }
     navigate(`/submit-review/${product._id}/${sellerReviewTargetId}`);
+  };
+
+  const handleViewSellerReputation = () => {
+    if (!sellerReviewTargetId) {
+      toast.error("Seller information is not available for this listing.");
+      return;
+    }
+    navigate(`/seller/${sellerReviewTargetId}`);
   };
 
   return (
@@ -196,6 +213,15 @@ const ProductDetailPage = () => {
                   Schedule Meeting
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={handleViewSellerReputation}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50"
+              >
+                <ShieldCheck size={18} className="text-indigo-600" />
+                View Seller Reputation
+              </button>
 
               <div className="mt-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-purple-50 p-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
