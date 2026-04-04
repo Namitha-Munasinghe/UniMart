@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -16,10 +16,15 @@ import {
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
+import SellerReviewsPage from "./SellerReviewsPage";
 
 const ProfilePage = () => {
   const { user, logout, deleteAccount, loading } = useUserStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const userData = user;
+  const isCurrentUserProfile = true;
+  const reviewsSectionRef = useRef(null);
 
   if (!user) return null;
 
@@ -31,11 +36,25 @@ const ProfilePage = () => {
     day: "numeric",
   });
 
-  const joinedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
+  const joinedDate = new Date(userData.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+
+  const canViewSellerReviews = userData.role === "seller" || isCurrentUserProfile;
+
+  const handleToggleReviews = () => {
+    setShowReviews((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => {
+          reviewsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 120);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-6">
@@ -49,13 +68,13 @@ const ProfilePage = () => {
         <div className="flex items-center justify-between border-b pb-6">
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
-              {user.name.charAt(0).toUpperCase()}
+              {userData.name.charAt(0).toUpperCase()}
             </div>
 
             <div>
               <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                Welcome back, {user.name} 
-                {user.role === "admin" && (
+                Welcome back, {userData.name} 
+                {userData.role === "admin" && (
                   <span className="flex items-center gap-1 text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full">
                     <ShieldCheck size={16} />
                     Admin
@@ -73,7 +92,7 @@ const ProfilePage = () => {
               </p>
 
               <span className="inline-block mt-3 px-3 py-1 text-sm bg-indigo-100 text-indigo-600 rounded-full">
-                {user.studentId}
+                {userData.studentId}
               </span>
             </div>
           </div>
@@ -100,10 +119,10 @@ const ProfilePage = () => {
             </div>
             <p className="text-2xl font-bold text-gray-800">
               {/* {user.rating.toFixed(1)} ⭐   */}
-              {(user.rating ?? 0).toFixed(1)} ⭐
+              {(userData.rating ?? 0).toFixed(1)} ⭐
             </p>
             <p className="text-sm text-gray-500">
-              Based on {user.totalReviews} reviews
+              Based on {userData.totalReviews} reviews
             </p>
           </div>
 
@@ -111,7 +130,7 @@ const ProfilePage = () => {
           <div className="bg-gradient-to-r from-indigo-100 to-indigo-50 p-6 rounded-xl shadow-sm">
             <h3 className="font-semibold text-gray-700 mb-2">Role</h3>
             <p className="text-xl font-bold capitalize text-gray-800">
-              {user.role}
+              {userData.role}
             </p>
           </div>
 
@@ -121,7 +140,7 @@ const ProfilePage = () => {
               Account Status
             </h3>
             <p className="text-xl font-bold text-gray-800">
-              {user.isBlocked ? "Blocked 🔴" : "Active 🟢"}
+              {userData.isBlocked ? "Blocked 🔴" : "Active 🟢"}
             </p>
           </div>
         </div>
@@ -138,12 +157,12 @@ const ProfilePage = () => {
             <div className="space-y-3 text-gray-600">
               <p className="flex items-center gap-3">
                 <School size={18} className="text-indigo-500" />
-                Faculty: {user.faculty}
+                Faculty: {userData.faculty}
               </p>
 
               <p className="flex items-center gap-3">
                 <IdCard size={18} className="text-indigo-500" />
-                Student ID: {user.studentId}
+                Student ID: {userData.studentId}
               </p>
             </div>
           </div>
@@ -157,12 +176,12 @@ const ProfilePage = () => {
             <div className="space-y-3 text-gray-600">
               <p className="flex items-center gap-3">
                 <Mail size={18} className="text-indigo-500" />
-                {user.email}
+                {userData.email}
               </p>
 
               <p className="flex items-center gap-3">
                 <Phone size={18} className="text-indigo-500" />
-                {user.phone}
+                {userData.phone}
               </p>
             </div>
           </div>
@@ -238,6 +257,12 @@ const ProfilePage = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {canViewSellerReviews && showReviews && (
+        <div ref={reviewsSectionRef} className="mt-10">
+          <SellerReviewsPage sellerId={userData._id || userData.id} />
         </div>
       )}
     </div>
