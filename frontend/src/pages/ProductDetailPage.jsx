@@ -243,15 +243,7 @@ const ProductDetailPage = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
-                  <div className="flex items-center gap-3 text-gray-700">
-                    <Clock3 size={18} className="text-indigo-600" />
-                    <span className="font-medium">Listing expires</span>
-                  </div>
-                  <span className="font-semibold text-gray-700">
-                    {new Date(product.expiresAt).toLocaleDateString()}
-                  </span>
-                </div>
+                
               </div>
             </div>
 
