@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -13,15 +13,20 @@ import {
   Trash2,
   Package,
   MessageSquareMore,
+  Sparkles,
+  X,
 } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
 import SellerReviewsPage from "./SellerReviewsPage";
+import { PRODUCT_CATEGORIES, categoryDisplayName } from "../constants/categories";
 
 const ProfilePage = () => {
-  const { user, logout, deleteAccount, loading } = useUserStore();
+  const { user, logout, deleteAccount, loading, updateInterests } = useUserStore();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
+  const [editingInterests, setEditingInterests] = useState(false);
+  const [interestDraft, setInterestDraft] = useState([]);
   const userData = user;
   const isCurrentUserProfile = true;
   const reviewsSectionRef = useRef(null);
@@ -43,6 +48,13 @@ const ProfilePage = () => {
   });
 
   const canViewSellerReviews = userData.role === "seller" || isCurrentUserProfile;
+  const interestLabels = Array.isArray(userData.interests)
+    ? userData.interests.map((interest) => categoryDisplayName(interest))
+    : [];
+
+  useEffect(() => {
+    setInterestDraft(Array.isArray(userData?.interests) ? userData.interests : []);
+  }, [userData?.interests]);
 
   const handleToggleReviews = () => {
     setShowReviews((prev) => {
@@ -54,6 +66,21 @@ const ProfilePage = () => {
       }
       return next;
     });
+  };
+
+  const toggleDraftInterest = (interest) => {
+    setInterestDraft((current) =>
+      current.includes(interest)
+        ? current.filter((item) => item !== interest)
+        : [...current, interest],
+    );
+  };
+
+  const handleSaveInterests = async () => {
+    const success = await updateInterests(interestDraft);
+    if (success) {
+      setEditingInterests(false);
+    }
   };
 
   return (
@@ -185,6 +212,93 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="mt-8 bg-gray-50 p-6 rounded-xl shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="text-indigo-500" />
+              <h3 className="text-lg font-semibold text-gray-700">My Interests</h3>
+            </div>
+
+            {editingInterests ? (
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInterestDraft(Array.isArray(userData.interests) ? userData.interests : []);
+                    setEditingInterests(false);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={loading || interestDraft.length < 3}
+                  onClick={handleSaveInterests}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:cursor-not-allowed disabled:bg-indigo-300"
+                >
+                  Save Interests
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingInterests(true)}
+                className="px-4 py-2 rounded-xl bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+              >
+                Edit Interests
+              </button>
+            )}
+          </div>
+
+          {editingInterests ? (
+            <div>
+              <p className="mb-4 text-sm text-gray-500">
+                Keep at least 3 interests. You can remove extras or add new ones below.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {PRODUCT_CATEGORIES.map((interest) => {
+                  const selected = interestDraft.includes(interest);
+
+                  return (
+                    <button
+                      key={interest}
+                      type="button"
+                      onClick={() => toggleDraftInterest(interest)}
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                        selected
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "bg-white text-gray-700 border border-gray-300 hover:border-indigo-300 hover:text-indigo-700"
+                      }`}
+                    >
+                      {categoryDisplayName(interest)}
+                      {selected && <X size={14} />}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-4 text-sm font-medium text-gray-600">
+                Selected: {interestDraft.length}
+              </p>
+            </div>
+          ) : interestLabels.length > 0 ? (
+            <div className="flex flex-wrap gap-3">
+              {interestLabels.map((interest) => (
+                <span
+                  key={interest}
+                  className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700"
+                >
+                  {interest}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">
+              You have not selected interests yet.
+            </p>
+          )}
         </div>
 
         <div className="mt-10 border-t pt-6 flex flex-wrap justify-between gap-3">

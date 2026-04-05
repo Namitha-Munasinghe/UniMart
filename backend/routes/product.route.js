@@ -6,15 +6,20 @@ import {
   getMyProducts,
   getProductById,
   getProductsByCategory,
+  getRecommendedProducts,
+  trackSearchSignal,
   suggestProductPrice,
   updateProduct,
 } from "../controllers/product.controller.js";
 import { createCloudinaryUpload } from "../lib/cloudinary.js";
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 const productUpload = createCloudinaryUpload("UniMart_Products");
 
 router.get("/available", getAvailableProducts);
+router.get("/recommended", protectRoute, getRecommendedProducts);
+router.post("/search-signal", protectRoute, trackSearchSignal);
 router.get("/category/:category", getProductsByCategory);
 router.get("/my-products", getMyProducts);
 router.post("/suggest-price", suggestProductPrice);

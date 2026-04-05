@@ -7,6 +7,7 @@ import { connectDB } from "./lib/db.js";
 import reviewRoutes from "./routes/review.route.js";
 import productRoutes from "./routes/product.route.js";
 import meetingRoutes from "./routes/meeting.route.js";
+import userRoutes from "./routes/user.route.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/meetings", meetingRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log("Server is running on http://localhost:" + PORT);

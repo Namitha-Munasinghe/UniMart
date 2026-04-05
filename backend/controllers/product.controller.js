@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Product, { PRODUCT_CATEGORIES } from "../model/product.model.js";
+import User from "../model/user.model.js";
 
 const DUMMY_SELLER_ID = process.env.DUMMY_SELLER_ID || "000000000000000000000001";
 
@@ -65,6 +66,15 @@ const formatProduct = (product) => {
 };
 
 const ensureValidCategory = (category) => PRODUCT_CATEGORIES.includes(category);
+const CATEGORY_KEYWORDS = {
+  mobiles: ["mobile", "mobiles", "phone", "phones", "smartphone", "iphone", "android"],
+  laptops: ["laptop", "laptops", "notebook", "macbook"],
+  electronics: ["electronics", "electronic", "monitor", "speaker", "headphone", "gadget", "gadgets"],
+  accessories: ["accessory", "accessories", "charger", "case", "bag", "keyboard", "mouse"],
+  "notes/books": ["notes", "books", "book", "textbook", "past paper", "lecture note"],
+  "boarding/rooms": ["boarding", "room", "rooms", "rent", "rental", "accommodation"],
+  services: ["service", "services", "repair", "design", "tutor", "tuition"],
+};
 
 const buildPublicQuery = (extraFilters = {}) => ({
   status: "Available",
@@ -79,6 +89,45 @@ const assertOwner = (product, sellerId) => {
   }
 
   return true;
+};
+
+const inferCategoryFromSearch = async ({ query = "", category }) => {
+  if (category && ensureValidCategory(category)) {
+    return category;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) {
+    return null;
+  }
+
+  const keywordMatch = PRODUCT_CATEGORIES.find((candidate) =>
+    CATEGORY_KEYWORDS[candidate]?.some((keyword) => normalizedQuery.includes(keyword)),
+  );
+
+  if (keywordMatch) {
+    return keywordMatch;
+  }
+
+  const regex = new RegExp(normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  const matchingProducts = await Product.find(
+    buildPublicQuery({
+      $or: [{ name: regex }, { description: regex }],
+    }),
+  )
+    .limit(20)
+    .select("category");
+
+  if (!matchingProducts.length) {
+    return null;
+  }
+
+  const categoryCounts = matchingProducts.reduce((accumulator, product) => {
+    accumulator[product.category] = (accumulator[product.category] || 0) + 1;
+    return accumulator;
+  }, {});
+
+  return Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
 };
 
 export const createProduct = async (req, res) => {
@@ -295,6 +344,100 @@ export const getProductsByCategory = async (req, res) => {
     });
   } catch (error) {
     console.error("Get Products By Category Error:", error.message);
+    res.status(500).json({ success: false, message: "Server Error: " + error.message });
+  }
+};
+
+export const getRecommendedProducts = async (req, res) => {
+  try {
+    await syncExpiredProducts();
+
+    const interests = Array.isArray(req.user?.interests) ? req.user.interests : [];
+    const repeatedSearchCategories = Array.isArray(req.user?.searchCategorySignals)
+      ? req.user.searchCategorySignals
+          .filter((signal) => signal.count >= 2)
+          .sort((a, b) => b.count - a.count || new Date(b.lastSearchedAt) - new Date(a.lastSearchedAt))
+          .map((signal) => signal.category)
+      : [];
+    const recommendationCategories = [...new Set([...interests, ...repeatedSearchCategories])];
+
+    if (recommendationCategories.length === 0) {
+      return res.status(200).json({
+        success: true,
+        totalProducts: 0,
+        data: [],
+      });
+    }
+
+    const products = await Product.find(
+      buildPublicQuery({
+        category: { $in: recommendationCategories },
+        sellerId: { $ne: req.user._id },
+      }),
+    )
+      .populate("sellerId", "name email phone faculty")
+      .sort({ createdAt: -1 })
+      .limit(8);
+
+    res.status(200).json({
+      success: true,
+      totalProducts: products.length,
+      data: products.map(formatProduct),
+    });
+  } catch (error) {
+    console.error("Get Recommended Products Error:", error.message);
+    res.status(500).json({ success: false, message: "Server Error: " + error.message });
+  }
+};
+
+export const trackSearchSignal = async (req, res) => {
+  try {
+    await syncExpiredProducts();
+
+    const query = req.body?.query?.trim() || "";
+    const category = req.body?.category || null;
+    const inferredCategory = await inferCategoryFromSearch({ query, category });
+
+    if (!inferredCategory) {
+      return res.status(200).json({ success: true, tracked: false });
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    const existingSignal = user.searchCategorySignals.find((signal) => signal.category === inferredCategory);
+
+    if (existingSignal) {
+      existingSignal.count += 1;
+      existingSignal.lastQuery = query;
+      existingSignal.lastSearchedAt = new Date();
+    } else {
+      user.searchCategorySignals.push({
+        category: inferredCategory,
+        count: 1,
+        lastQuery: query,
+        lastSearchedAt: new Date(),
+      });
+    }
+
+    user.searchCategorySignals = user.searchCategorySignals
+      .sort((a, b) => b.count - a.count || new Date(b.lastSearchedAt) - new Date(a.lastSearchedAt))
+      .slice(0, 10);
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      tracked: true,
+      data: {
+        category: inferredCategory,
+      },
+    });
+  } catch (error) {
+    console.error("Track Search Signal Error:", error.message);
     res.status(500).json({ success: false, message: "Server Error: " + error.message });
   }
 };

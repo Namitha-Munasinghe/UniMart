@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { PRODUCT_CATEGORIES } from "./product.model.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,6 +34,39 @@ const userSchema = new mongoose.Schema(
     faculty: {
       type: String,
       required: [true, "Faculty is required"],
+    },
+    interests: {
+      type: [String],
+      enum: PRODUCT_CATEGORIES,
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && new Set(value).size === value.length,
+        message: "Interests must be unique categories.",
+      },
+    },
+    searchCategorySignals: {
+      type: [
+        {
+          category: {
+            type: String,
+            enum: PRODUCT_CATEGORIES,
+            required: true,
+          },
+          count: {
+            type: Number,
+            default: 1,
+          },
+          lastQuery: {
+            type: String,
+            default: "",
+          },
+          lastSearchedAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      default: [],
     },
     // profileImage: {
     //   type: String,
