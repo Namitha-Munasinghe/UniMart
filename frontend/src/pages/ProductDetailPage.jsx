@@ -242,8 +242,6 @@ const ProductDetailPage = () => {
                     {new Date(product.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-
-                
               </div>
             </div>
 
