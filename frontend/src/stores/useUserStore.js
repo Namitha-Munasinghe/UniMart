@@ -104,6 +104,19 @@ export const useUserStore = create((set) => ({
     toast.error(error.response?.data?.message || "Update failed");
   }
 },
+	updateInterests: async (interests) => {
+		try {
+			set({ loading: true });
+			const res = await axios.put("/users/interests", { interests });
+			set({ user: res.data, loading: false });
+			toast.success("Your interests were saved");
+			return true;
+		} catch (error) {
+			set({ loading: false });
+			toast.error(error.response?.data?.message || "Failed to save interests");
+			return false;
+		}
+	},
 }));
 
 let refreshPromise = null;

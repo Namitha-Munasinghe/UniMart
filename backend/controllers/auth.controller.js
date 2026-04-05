@@ -68,6 +68,7 @@ export const signup = async (req, res) => {
       studentId: user.studentId,
       phone: user.phone,
       faculty: user.faculty,
+      interests: user.interests,
       role: user.role,
     });
   } catch (error) {
@@ -111,6 +112,7 @@ export const login = async (req, res) => {
       studentId: user.studentId,
       phone: user.phone,
       faculty: user.faculty,
+      interests: user.interests,
       role: user.role,
     });
   } catch (error) {
