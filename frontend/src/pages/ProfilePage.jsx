@@ -1,25 +1,74 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Mail,
-  Phone,
-  School,
+  CalendarDays,
+  Edit,
   IdCard,
   LogOut,
-  CalendarDays,
-  Star,
-  ShieldCheck,
-  Edit,
-  Trash2,
-  Package,
+  Mail,
   MessageSquareMore,
+  Package,
+  Phone,
+  School,
+  ShieldCheck,
   Sparkles,
+  Star,
+  Trash2,
+  UserRound,
   X,
 } from "lucide-react";
-import { useUserStore } from "../stores/useUserStore";
 import { Link } from "react-router-dom";
 import SellerReviewsPage from "./SellerReviewsPage";
 import { PRODUCT_CATEGORIES, categoryDisplayName } from "../constants/categories";
+import { useUserStore } from "../stores/useUserStore";
+
+const StatCard = ({ icon: Icon, label, value, hint, accent = "indigo" }) => {
+  const accentStyles = {
+    indigo: "bg-indigo-50 text-indigo-700 ring-indigo-100",
+    slate: "bg-slate-100 text-slate-800 ring-slate-200",
+    emerald: "bg-emerald-50 text-emerald-700 ring-emerald-100",
+  };
+
+  return (
+    <div className="rounded-[1.75rem] border border-indigo-100 bg-white p-6 shadow-lg shadow-indigo-100/40">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">{label}</p>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+          {hint ? <p className="mt-2 text-sm text-slate-500">{hint}</p> : null}
+        </div>
+        <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ring-1 ${accentStyles[accent]}`}>
+          <Icon size={20} />
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const InfoCard = ({ title, icon: Icon, children }) => (
+  <div className="rounded-[1.75rem] border border-indigo-100 bg-white p-6 shadow-lg shadow-indigo-100/30">
+    <div className="flex items-center gap-3">
+      <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+        <Icon size={20} />
+      </span>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">Profile details</p>
+        <h3 className="text-xl font-bold text-slate-900">{title}</h3>
+      </div>
+    </div>
+    <div className="mt-6 space-y-4">{children}</div>
+  </div>
+);
+
+const DetailRow = ({ icon: Icon, label, value }) => (
+  <div className="flex items-start gap-3 rounded-2xl bg-indigo-50/70 px-4 py-3">
+    <Icon size={18} className="mt-0.5 shrink-0 text-indigo-600" />
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">{label}</p>
+      <p className="mt-1 text-sm font-medium text-slate-700">{value || "Not provided"}</p>
+    </div>
+  </div>
+);
 
 const ProfilePage = () => {
   const { user, logout, deleteAccount, loading, updateInterests } = useUserStore();
@@ -27,34 +76,29 @@ const ProfilePage = () => {
   const [showReviews, setShowReviews] = useState(false);
   const [editingInterests, setEditingInterests] = useState(false);
   const [interestDraft, setInterestDraft] = useState([]);
-  const userData = user;
-  const isCurrentUserProfile = true;
   const reviewsSectionRef = useRef(null);
 
   if (!user) return null;
 
   const meetingsPath = user.role !== "admin" ? "/my-meetings" : null;
-
   const today = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-
-  const joinedDate = new Date(userData.createdAt).toLocaleDateString("en-US", {
+  const joinedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-
-  const canViewSellerReviews = userData.role === "seller" || isCurrentUserProfile;
-  const interestLabels = Array.isArray(userData.interests)
-    ? userData.interests.map((interest) => categoryDisplayName(interest))
+  const canViewSellerReviews = user.role === "seller";
+  const interestLabels = Array.isArray(user.interests)
+    ? user.interests.map((interest) => categoryDisplayName(interest))
     : [];
 
   useEffect(() => {
-    setInterestDraft(Array.isArray(userData?.interests) ? userData.interests : []);
-  }, [userData?.interests]);
+    setInterestDraft(Array.isArray(user?.interests) ? user.interests : []);
+  }, [user?.interests]);
 
   const handleToggleReviews = () => {
     setShowReviews((prev) => {
@@ -84,141 +128,118 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-8"
+        transition={{ duration: 0.45 }}
+        className="mx-auto max-w-6xl"
       >
-        {/* Header Section */}
-        <div className="flex items-center justify-between border-b pb-6">
-          <div className="flex items-center gap-6">
-            <div className="w-24 h-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
-              {userData.name.charAt(0).toUpperCase()}
-            </div>
-
+        <section className="overflow-hidden rounded-[2rem] bg-indigo-700 text-white shadow-2xl shadow-indigo-300/40">
+          <div className="grid gap-8 px-6 py-8 md:grid-cols-[1.2fr_0.8fr] md:px-10 md:py-10">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                Welcome back, {userData.name} 
-                {userData.role === "admin" && (
-                  <span className="flex items-center gap-1 text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full">
-                    <ShieldCheck size={16} />
-                    Admin
-                  </span>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-100">My profile</p>
+              <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
+                <div className="flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/15 text-4xl font-bold ring-1 ring-white/20 backdrop-blur">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{user.name}</h1>
+                    {user.role === "admin" && (
+                      <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white ring-1 ring-white/15">
+                        <ShieldCheck size={16} />
+                        Admin
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm text-indigo-100 sm:text-base">
+                    Keep your academic and contact details current so buyers and sellers can trade with confidence.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/15">
+                      {user.studentId}
+                    </span>
+                    <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/15 capitalize">
+                      {user.role}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 self-end">
+              <div className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <p className="text-xs uppercase tracking-[0.2em] text-indigo-100">Member since</p>
+                <p className="mt-3 text-xl font-bold">{joinedDate}</p>
+                <p className="mt-2 text-sm text-indigo-100/90">Today is {today}</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/my-products" className="flex-1 min-w-[180px]">
+                  <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 font-semibold text-indigo-700 transition hover:bg-indigo-50">
+                    <Package size={18} />
+                    My Products
+                  </button>
+                </Link>
+                {canViewSellerReviews && (
+                  <button
+                    type="button"
+                    onClick={handleToggleReviews}
+                    className="flex flex-1 min-w-[180px] items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 font-semibold text-white transition hover:bg-white/15"
+                  >
+                    <Star size={18} />
+                    {showReviews ? "Hide Reviews" : "View Reviews"}
+                  </button>
                 )}
-              </h2>
-
-              <p className="text-gray-500 mt-1 flex items-center gap-2">
-                <CalendarDays size={16} />
-                Today is {today}
-              </p>
-
-              <p className="text-gray-400 text-sm mt-1">
-                Member since {joinedDate}
-              </p>
-
-              <span className="inline-block mt-3 px-3 py-1 text-sm bg-indigo-100 text-indigo-600 rounded-full">
-                {userData.studentId}
-              </span>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Edit Button */}
-          <Link to="/edit-profile">
-            <button
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition"
-            >
-              <Edit size={18} />
-              Edit Profile
-            </button>
-          </Link>
-        </div>
+        <section className="mt-8 grid gap-5 md:grid-cols-3">
+          <StatCard
+            icon={Star}
+            label="Seller rating"
+            value={`${(user.rating ?? 0).toFixed(1)} / 5`}
+            hint={`Based on ${user.totalReviews ?? 0} reviews`}
+          />
+          <StatCard icon={UserRound} label="Account role" value={user.role} hint="Current marketplace access level" accent="slate" />
+          <StatCard
+            icon={ShieldCheck}
+            label="Account status"
+            value={user.isBlocked ? "Blocked" : "Active"}
+            hint={user.isBlocked ? "This account currently has restrictions." : "Your account is in good standing."}
+            accent={user.isBlocked ? "slate" : "emerald"}
+          />
+        </section>
 
-        {/* Stats Cards Section */}
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
-          
-          {/* Rating Card */}
-          <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 p-6 rounded-xl shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <Star className="text-yellow-500" />
-              <h3 className="font-semibold text-gray-700">Rating</h3>
-            </div>
-            <p className="text-2xl font-bold text-gray-800">
-              {/* {user.rating.toFixed(1)} ⭐   */}
-              {(userData.rating ?? 0).toFixed(1)} ⭐
-            </p>
-            <p className="text-sm text-gray-500">
-              Based on {userData.totalReviews} reviews
-            </p>
-          </div>
+        <section className="mt-8 grid gap-6 lg:grid-cols-2">
+          <InfoCard title="Academic information" icon={School}>
+            <DetailRow icon={School} label="Faculty" value={user.faculty} />
+            <DetailRow icon={IdCard} label="Student ID" value={user.studentId} />
+          </InfoCard>
 
-          {/* Role Card */}
-          <div className="bg-gradient-to-r from-indigo-100 to-indigo-50 p-6 rounded-xl shadow-sm">
-            <h3 className="font-semibold text-gray-700 mb-2">Role</h3>
-            <p className="text-xl font-bold capitalize text-gray-800">
-              {userData.role}
-            </p>
-          </div>
+          <InfoCard title="Contact information" icon={Mail}>
+            <DetailRow icon={Mail} label="Email address" value={user.email} />
+            <DetailRow icon={Phone} label="Phone number" value={user.phone} />
+          </InfoCard>
+        </section>
 
-          {/* Account Status Card */}
-          <div className="bg-gradient-to-r from-green-100 to-green-50 p-6 rounded-xl shadow-sm">
-            <h3 className="font-semibold text-gray-700 mb-2">
-              Account Status
-            </h3>
-            <p className="text-xl font-bold text-gray-800">
-              {userData.isBlocked ? "Blocked 🔴" : "Active 🟢"}
-            </p>
-          </div>
-        </div>
-
-        {/* Info Sections */}
-        <div className="grid md:grid-cols-2 gap-8 mt-10">
-          
-          {/* Academic Info */}
-          <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Academic Information
-            </h3>
-
-            <div className="space-y-3 text-gray-600">
-              <p className="flex items-center gap-3">
-                <School size={18} className="text-indigo-500" />
-                Faculty: {userData.faculty}
+        <section className="mt-8 rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-xl shadow-indigo-100/30 sm:p-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+                  <Sparkles size={20} />
+                </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500">Personalisation</p>
+                  <h2 className="text-2xl font-bold text-slate-900">My interests</h2>
+                </div>
+              </div>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-500">
+                These categories help UniMart surface listings that feel relevant the moment you arrive on the homepage.
               </p>
-
-              <p className="flex items-center gap-3">
-                <IdCard size={18} className="text-indigo-500" />
-                Student ID: {userData.studentId}
-              </p>
-            </div>
-          </div>
-
-          {/* Contact Info */}
-          <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Contact Information
-            </h3>
-
-            <div className="space-y-3 text-gray-600">
-              <p className="flex items-center gap-3">
-                <Mail size={18} className="text-indigo-500" />
-                {userData.email}
-              </p>
-
-              <p className="flex items-center gap-3">
-                <Phone size={18} className="text-indigo-500" />
-                {userData.phone}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 bg-gray-50 p-6 rounded-xl shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <Sparkles className="text-indigo-500" />
-              <h3 className="text-lg font-semibold text-gray-700">My Interests</h3>
             </div>
 
             {editingInterests ? (
@@ -226,10 +247,10 @@ const ProfilePage = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    setInterestDraft(Array.isArray(userData.interests) ? userData.interests : []);
+                    setInterestDraft(Array.isArray(user.interests) ? user.interests : []);
                     setEditingInterests(false);
                   }}
-                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
                   Cancel
                 </button>
@@ -237,7 +258,7 @@ const ProfilePage = () => {
                   type="button"
                   disabled={loading || interestDraft.length < 3}
                   onClick={handleSaveInterests}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:cursor-not-allowed disabled:bg-indigo-300"
+                  className="rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
                 >
                   Save Interests
                 </button>
@@ -246,7 +267,7 @@ const ProfilePage = () => {
               <button
                 type="button"
                 onClick={() => setEditingInterests(true)}
-                className="px-4 py-2 rounded-xl bg-indigo-100 text-indigo-700 hover:bg-indigo-200 transition"
+                className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-200"
               >
                 Edit Interests
               </button>
@@ -254,9 +275,9 @@ const ProfilePage = () => {
           </div>
 
           {editingInterests ? (
-            <div>
-              <p className="mb-4 text-sm text-gray-500">
-                Keep at least 3 interests. You can remove extras or add new ones below.
+            <div className="mt-8">
+              <p className="mb-4 text-sm text-slate-500">
+                Select at least 3 categories so recommendations stay useful and focused.
               </p>
               <div className="flex flex-wrap gap-3">
                 {PRODUCT_CATEGORIES.map((interest) => {
@@ -267,94 +288,101 @@ const ProfilePage = () => {
                       key={interest}
                       type="button"
                       onClick={() => toggleDraftInterest(interest)}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
                         selected
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "bg-white text-gray-700 border border-gray-300 hover:border-indigo-300 hover:text-indigo-700"
+                          ? "bg-indigo-600 text-white shadow-md"
+                          : "border border-indigo-200 bg-indigo-50/70 text-indigo-800 hover:border-indigo-300 hover:bg-indigo-100"
                       }`}
                     >
                       {categoryDisplayName(interest)}
-                      {selected && <X size={14} />}
+                      {selected ? <X size={14} /> : null}
                     </button>
                   );
                 })}
               </div>
-              <p className="mt-4 text-sm font-medium text-gray-600">
-                Selected: {interestDraft.length}
-              </p>
+              <p className="mt-4 text-sm font-medium text-slate-600">Selected: {interestDraft.length}</p>
             </div>
           ) : interestLabels.length > 0 ? (
-            <div className="flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               {interestLabels.map((interest) => (
                 <span
                   key={interest}
-                  className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700"
+                  className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700"
                 >
                   {interest}
                 </span>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
-              You have not selected interests yet.
-            </p>
+            <p className="mt-8 text-sm text-slate-500">You have not selected interests yet.</p>
           )}
-        </div>
+        </section>
 
-        <div className="mt-10 border-t pt-6 flex flex-wrap justify-between gap-3">
-          <div className="flex flex-wrap gap-3">
-            <Link to="/my-products">
-              <button className="flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl shadow-md transition">
-                <Package size={18} />
-                My Products
-              </button>
-            </Link>
-
-            {meetingsPath && (
-              <Link to={meetingsPath}>
-                <button className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md transition">
-                  <MessageSquareMore size={18} />
-                  My Meetings
+        <section className=" ">
+          <div className="h-12" aria-hidden="true"></div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-indigo-500"></p>
+              <h2 className="mt-2 text-2xl font-bold text-slate-900"></h2>
+              <p className="mt-2 text-sm text-slate-500">
+                
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/edit-profile">
+                <button className="flex items-center gap-2 rounded-2xl bg-indigo-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-800">
+                  
+                  <Edit size={18} />
+                  Edit Profile
                 </button>
               </Link>
-            )}
-          </div>
 
-          <div className="flex flex-wrap justify-end gap-3">
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
-            >
-              <Trash2 size={18} />
-              Delete Account
-            </button>
+              {/* {meetingsPath ? (
+                <Link to={meetingsPath}>
+                  <button className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700">
+                    <MessageSquareMore size={18} />
+                    My Meetings
+                  </button>
+                </Link>
+              ) : null} */}
 
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md transition"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
+            
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 rounded-2xl border border-red-200 bg-white px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                <Trash2 size={18} />
+                Delete Account
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {canViewSellerReviews && showReviews ? (
+          <div ref={reviewsSectionRef} className="mt-8">
+            <SellerReviewsPage sellerId={user._id || user.id} />
+          </div>
+        ) : null}
       </motion.div>
 
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
-            <h3 className="text-xl font-bold text-gray-800">Delete account?</h3>
-            <p className="mt-2 text-sm text-gray-600">
-              This action will permanently delete your account. Do you want to continue?
+      {showDeleteConfirm ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[1.75rem] border border-indigo-100 bg-white p-6 shadow-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-500">Danger zone</p>
+            <h3 className="mt-3 text-2xl font-bold text-slate-900">Delete account?</h3>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              This permanently removes your UniMart account and related activity. Continue only if you are sure.
             </p>
 
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
-                No
+                Cancel
               </button>
               <button
                 type="button"
@@ -365,20 +393,14 @@ const ProfilePage = () => {
                     setShowDeleteConfirm(false);
                   }
                 }}
-                className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-70"
+                className="rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-70"
               >
-                {loading ? "Deleting..." : "Yes"}
+                {loading ? "Deleting..." : "Delete account"}
               </button>
             </div>
           </div>
         </div>
-      )}
-
-      {canViewSellerReviews && showReviews && (
-        <div ref={reviewsSectionRef} className="mt-10">
-          <SellerReviewsPage sellerId={userData._id || userData.id} />
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };

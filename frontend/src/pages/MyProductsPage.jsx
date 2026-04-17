@@ -191,7 +191,7 @@ const MyProductsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="rounded-3xl bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 p-8 text-white shadow-xl">
+        <div className="rounded-3xl bg-indigo-700 p-8 text-white shadow-xl">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.3em] text-indigo-100">Seller Dashboard</p>

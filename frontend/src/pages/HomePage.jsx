@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays, LayoutGrid, Package, Search, Sparkles, Star, User } from "lucide-react";
+import { ArrowRight, CalendarDays, LayoutGrid, Package, Search, Star, User } from "lucide-react";
 import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 import { PRODUCT_CATEGORIES, categoryDisplayName } from "../constants/categories";
 import { useUserStore } from "../stores/useUserStore";
+
+const PRODUCTS_PER_PAGE = 8;
 
 const ProductCard = ({ product }) => (
   <Link
@@ -68,24 +70,33 @@ const HomePage = () => {
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const hasInterestProfile = Array.isArray(user?.interests) && user.interests.length >= 3;
   const lastTrackedSearchRef = useRef("");
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
-    return products.filter((product) => {
-      const matchesCategory = !categoryFilter || product.category === categoryFilter;
-      const matchesSearch =
-        !normalizedSearch ||
-        product.name?.toLowerCase().includes(normalizedSearch) ||
-        product.description?.toLowerCase().includes(normalizedSearch) ||
-        product.category?.toLowerCase().includes(normalizedSearch) ||
-        product.seller?.name?.toLowerCase().includes(normalizedSearch);
+    return [...products]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .filter((product) => {
+        const matchesCategory = !categoryFilter || product.category === categoryFilter;
+        const matchesSearch =
+          !normalizedSearch ||
+          product.name?.toLowerCase().includes(normalizedSearch) ||
+          product.description?.toLowerCase().includes(normalizedSearch) ||
+          product.category?.toLowerCase().includes(normalizedSearch) ||
+          product.seller?.name?.toLowerCase().includes(normalizedSearch);
 
-      return matchesCategory && matchesSearch;
-    });
+        return matchesCategory && matchesSearch;
+      });
   }, [products, categoryFilter, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
 
   useEffect(() => {
     const loadLatestProducts = async () => {
@@ -148,6 +159,16 @@ const HomePage = () => {
 
     return () => clearTimeout(timeoutId);
   }, [user, searchTerm, categoryFilter]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, searchTerm]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
@@ -249,7 +270,9 @@ const HomePage = () => {
             </h2>
             {(categoryFilter || searchTerm.trim()) && (
               <p className="mt-1 text-sm text-gray-500">
-                Showing {filteredProducts.length} of {products.length} available listings
+                Showing {(currentPage - 1) * PRODUCTS_PER_PAGE + (paginatedProducts.length > 0 ? 1 : 0)}-
+                {(currentPage - 1) * PRODUCTS_PER_PAGE + paginatedProducts.length} of {filteredProducts.length} matching
+                listings
               </p>
             )}
           </div>
@@ -291,9 +314,52 @@ const HomePage = () => {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {paginatedProducts.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
+          </div>
+        )}
+
+        {!loading && filteredProducts.length > PRODUCTS_PER_PAGE && (
+          <div className="mt-8 flex flex-col gap-4 rounded-[1.75rem] border border-indigo-100 bg-white/90 px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={currentPage === 1}
+                className="rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      currentPage === page
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "border border-indigo-200 bg-indigo-50/80 text-indigo-800 hover:border-indigo-300 hover:bg-indigo-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                disabled={currentPage === totalPages}
+                className="rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:border-indigo-300 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </section>
