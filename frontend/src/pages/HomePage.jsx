@@ -152,13 +152,10 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-[2rem] bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 text-white shadow-2xl">
+        <div className="overflow-hidden rounded-[2rem] bg-indigo-700 text-white shadow-2xl">
           <div className="grid gap-8 px-6 py-10 md:grid-cols-[1.2fr_0.8fr] md:px-10">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-indigo-100">
-                <Sparkles size={14} />
-                Latest Listings
-              </p>
+              
               <h1 className="mt-5 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
                 Your campus, your marketplace!
               </h1>
