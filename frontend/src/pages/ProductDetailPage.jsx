@@ -132,17 +132,6 @@ const ProductDetailPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-10">
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="rounded-[2rem] bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 p-8 text-white shadow-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-indigo-100">Product Details</p>
-          <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <h1 className="text-4xl font-bold">{product.name}</h1>
-            <div className="rounded-3xl bg-white/10 px-5 py-4 backdrop-blur">
-              <p className="text-xs uppercase tracking-[0.18em] text-indigo-100">Price</p>
-              <p className="mt-2 text-3xl font-bold">LKR {product.price}</p>
-            </div>
-          </div>
-        </div>
-
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="space-y-6">
             <div className="rounded-[2rem] bg-white p-5 shadow-xl">
@@ -207,6 +196,19 @@ const ProductDetailPage = () => {
             <div className="rounded-[2rem] bg-white p-6 shadow-xl">
               <h2 className="text-2xl font-bold text-gray-800">Listing overview</h2>
               <div className="mt-5 space-y-4">
+                <div className="rounded-2xl bg-indigo-700 px-5 py-5 text-white shadow-lg">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-100">Product name</p>
+                  <h3 className="mt-3 text-2xl font-bold">{product.name}</h3>
+                </div>
+
+                <div className="flex items-center justify-between rounded-2xl bg-indigo-50 px-4 py-4">
+                  <div className="flex items-center gap-3 text-gray-700">
+                    <Tag size={18} className="text-indigo-600" />
+                    <span className="font-medium">Price</span>
+                  </div>
+                  <span className="font-semibold text-indigo-700">LKR {product.price}</span>
+                </div>
+
                 <div className="flex items-center justify-between gap-3 rounded-2xl bg-indigo-50 px-4 py-4">
                   <div className="flex items-center gap-3 text-gray-700">
                     <User size={18} className="shrink-0 text-indigo-600" />
@@ -297,7 +299,7 @@ const ProductDetailPage = () => {
                 <button
                   type="button"
                   onClick={handleWriteReview}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-md ring-2 ring-indigo-100 transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-lg"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-700 px-5 py-3 text-sm font-semibold text-white shadow-md ring-2 ring-indigo-100 transition hover:bg-indigo-800 hover:shadow-lg"
                 >
                   <Star size={16} className="fill-white" />
                   Write a Review

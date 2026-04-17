@@ -209,7 +209,7 @@ const HomePage = () => {
                 <LayoutGrid size={22} />
               </span>
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Shop by category</p>
+
                 <h2 className="text-xl font-bold text-gray-800 sm:text-2xl">Browse listings</h2>
               </div>
             </div>
@@ -264,7 +264,7 @@ const HomePage = () => {
       <section className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-indigo-600">Latest Listed Products</p>
+            
             <h2 className="mt-2 text-3xl font-bold text-gray-800">
               {categoryFilter ? categoryDisplayName(categoryFilter) : "Recently added listings"}
             </h2>
