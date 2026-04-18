@@ -1,5 +1,6 @@
 import { Navigate, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
+import Footer from "./components/Footer";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import Navbar from "./components/Navbar";
@@ -31,8 +32,8 @@ function App() {
   if (checkingAuth) return <LoadingSpinner />;
 
   return (
-    <div>
-      <div>
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-grow">
         <Navbar />
         <Routes>
           <Route path="/" element={requiresInterestSelection ? <Navigate to="/onboarding/interests" /> : <HomePage />} />
@@ -73,6 +74,7 @@ function App() {
           <Route path="*" element={<Navigate to={user ? (requiresInterestSelection ? "/onboarding/interests" : "/") : "/login"} />} />
         </Routes>
       </div>
+      <Footer />
       <Toaster />
     </div>
   );
