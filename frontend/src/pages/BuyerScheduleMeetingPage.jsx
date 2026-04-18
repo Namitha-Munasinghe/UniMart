@@ -18,6 +18,7 @@ import { useUserStore } from "../stores/useUserStore";
 const buyerTabs = ["Schedule", "My Meetings"];
 const locations = ["SLIIT Canteen", "New Building", "Main Building", "Custom"];
 const durations = [15, 30, 45, 60];
+const CHAT_POLL_INTERVAL_MS = 3000;
 const timeSlots = [
   { value: "09:00", label: "9:00 AM" },
   { value: "10:00", label: "10:00 AM" },
@@ -289,6 +290,54 @@ const BuyerScheduleMeetingPage = () => {
 
     loadPage();
   }, [productId]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const refreshMeetings = async () => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+
+      try {
+        const response = await axios.get("/meetings/buyer");
+
+        if (!isActive) {
+          return;
+        }
+
+        setBuyerMeetings(response.data.data || []);
+      } catch (error) {
+        if (isActive) {
+          console.error("Realtime buyer meeting refresh failed:", error.message);
+        }
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshMeetings();
+    }, CHAT_POLL_INTERVAL_MS);
+
+    const handleWindowFocus = () => {
+      void refreshMeetings();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshMeetings();
+      }
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     const currentSelection = new Date(`${selectedDate}T00:00:00`);
@@ -731,7 +780,7 @@ const BuyerScheduleMeetingPage = () => {
                     <Badge label={activeProductMeeting?.status || "Not Requested"} tone={statusToneMap[activeProductMeeting?.status] || "gray"} />
                   </div>
 
-                  <div className="flex h-[420px] flex-col">
+                  <div className="flex h-[520px] flex-col">
                     <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
                       {activeProductMeeting ? (
                         activeProductMessages.length > 0 ? (

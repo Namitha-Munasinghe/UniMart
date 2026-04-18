@@ -140,9 +140,7 @@ const ProfilePage = () => {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-indigo-100">My profile</p>
               <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div className="flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/15 text-4xl font-bold ring-1 ring-white/20 backdrop-blur">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
                     <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{user.name}</h1>
@@ -160,9 +158,7 @@ const ProfilePage = () => {
                     <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/15">
                       {user.studentId}
                     </span>
-                    <span className="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white ring-1 ring-white/15 capitalize">
-                      {user.role}
-                    </span>
+                    
                   </div>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import axios from "../lib/axios";
 
 const sellerTabs = ["Requests", "Chat", "History"];
+const CHAT_POLL_INTERVAL_MS = 3000;
 
 const sectionCardClass =
   "rounded-[24px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)]";
@@ -165,6 +166,56 @@ const SellerScheduleMeetingPage = () => {
     };
 
     fetchMeetings();
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const refreshMeetings = async () => {
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+
+      try {
+        const response = await axios.get("/meetings/seller");
+        const items = response.data.data || [];
+
+        if (!isActive) {
+          return;
+        }
+
+        setMeetings(items);
+        setSelectedMeetingId((currentId) => currentId || items[0]?._id || "");
+      } catch (error) {
+        if (isActive) {
+          console.error("Realtime seller meeting refresh failed:", error.message);
+        }
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshMeetings();
+    }, CHAT_POLL_INTERVAL_MS);
+
+    const handleWindowFocus = () => {
+      void refreshMeetings();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshMeetings();
+      }
+    };
+
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      isActive = false;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const selectedProduct = useMemo(
@@ -466,7 +517,7 @@ const SellerScheduleMeetingPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex h-[340px] flex-col">
+                  <div className="flex h-[520px] flex-col">
                     <div className="flex items-center gap-3 border-b border-indigo-200 bg-indigo-50 px-5 py-4">
                       <div className={`flex h-9 w-9 items-center justify-center rounded-full font-bold ${avatarClassNames.blue}`}>
                         {((currentMeeting?.buyer?.name || "B").slice(0, 1) || "B").toUpperCase()}
