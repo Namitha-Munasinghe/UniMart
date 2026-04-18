@@ -36,7 +36,7 @@ const Navbar = () => {
           <img
             src={unimart}
             alt="UniMart"
-            className="w-10 h-10 rounded-lg shadow-sm"
+            className="w-9 h-9 rounded-lg shadow-sm"
           />
           <span className="hidden sm:block">UniMart</span>
         </NavLink>
